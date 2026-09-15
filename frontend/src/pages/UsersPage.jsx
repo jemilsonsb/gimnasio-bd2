@@ -1,46 +1,45 @@
 import { useEffect, useState } from 'react';
-
-const usuariosMock = [
-  {
-    id_usuario: 1,
-    nombre: 'Ana García',
-    correo: 'ana@correo.com',
-    nombre_rol: 'Administrador',
-    estado: 'Activo'
-  },
-  {
-    id_usuario: 2,
-    nombre: 'Luis Pérez',
-    correo: 'luis@correo.com',
-    nombre_rol: 'Entrenador',
-    estado: 'Activo'
-  },
-  {
-    id_usuario: 3,
-    nombre: 'María López',
-    correo: 'maria@correo.com',
-    nombre_rol: 'Cliente',
-    estado: 'Inactivo'
-  }
-];
+import {
+  actualizarEstadoUsuario,
+  obtenerUsuarios
+} from '../services/usuario.service.js';
 
 export function UsersPage() {
-  const [usuarios, setUsuarios] = useState(usuariosMock);
+  const [usuarios, setUsuarios] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     document.title = 'Administración de usuarios';
+
+    async function cargarUsuarios() {
+      try {
+        const respuesta = await obtenerUsuarios();
+        setUsuarios(respuesta.data);
+      } catch (respuestaError) {
+        setError(respuestaError?.message || 'No se pudieron cargar los usuarios.');
+      } finally {
+        setCargando(false);
+      }
+    }
+
+    cargarUsuarios();
   }, []);
 
-  const cambiarEstado = (idUsuario) => {
-    setUsuarios((prev) =>
-      prev.map((usuario) => {
-        if (usuario.id_usuario !== idUsuario) return usuario;
+  async function cambiarEstado(usuario) {
+    const nuevoEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
 
-        const nuevoEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
-        return { ...usuario, estado: nuevoEstado };
-      })
-    );
-  };
+    try {
+      await actualizarEstadoUsuario(usuario.id_usuario, nuevoEstado);
+      setUsuarios((prev) => prev.map((actual) => (
+        actual.id_usuario === usuario.id_usuario
+          ? { ...actual, estado: nuevoEstado }
+          : actual
+      )));
+    } catch (respuestaError) {
+      setError(respuestaError?.message || 'No se pudo actualizar el estado.');
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -55,6 +54,8 @@ export function UsersPage() {
         </div>
 
         <div className="overflow-x-auto">
+          {cargando && <p className="mb-4 text-sm text-slate-600">Cargando usuarios...</p>}
+          {error && <p className="mb-4 text-sm text-red-700">{error}</p>}
           <table className="min-w-full border border-slate-200 text-left text-sm">
             <thead className="bg-slate-800 text-white">
               <tr>
@@ -89,7 +90,7 @@ export function UsersPage() {
                   <td className="px-4 py-3 text-center">
                     <button
                       type="button"
-                      onClick={() => cambiarEstado(usuario.id_usuario)}
+                      onClick={() => cambiarEstado(usuario)}
                       className={
                         usuario.estado === 'Activo'
                           ? 'rounded bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700'
