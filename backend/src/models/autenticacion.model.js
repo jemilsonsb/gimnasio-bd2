@@ -12,10 +12,12 @@ export async function buscarRolPorNombre(nombreRol, connection = pool) {
 export async function buscarUsuarioPorCorreo(correo) {
   const [filas] = await pool.execute(
     `SELECT u.id_usuario, u.nombre, u.apellido, u.documento_identidad,
-            u.correo, u.contrasena, u.telefono, u.estado,
+            u.correo, u.contrasena, u.telefono,
+            e.id_estado, e.nombre_estado AS estado,
             r.id_rol, r.nombre_rol
        FROM usuario u
        INNER JOIN rol r ON r.id_rol = u.fk_rol
+       INNER JOIN estado e ON e.id_estado = u.fk_estado
       WHERE u.correo = ?
       LIMIT 1`,
     [correo]
@@ -36,11 +38,20 @@ export async function crearUsuarioConExtension(datos) {
       throw error;
     }
 
+    const [estadosActivos] = await connection.execute(
+      "SELECT id_estado FROM estado WHERE nombre_estado = 'Activo' LIMIT 1"
+    );
+    if (!estadosActivos[0]) {
+      const error = new Error("No está configurado el estado 'Activo'");
+      error.code = 'ACTIVE_STATUS_NOT_FOUND';
+      throw error;
+    }
+
     const contrasenaHash = await bcrypt.hash(datos.contrasena, 12);
     const [resultadoUsuario] = await connection.execute(
       `INSERT INTO usuario
-        (nombre, apellido, documento_identidad, correo, contrasena, telefono, fecha_registro, fk_rol)
-       VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)`,
+          (nombre, apellido, documento_identidad, correo, contrasena, telefono, fecha_registro, fk_rol, fk_estado)
+               VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?)`,
       [
         datos.nombre,
         datos.apellido,
@@ -48,7 +59,8 @@ export async function crearUsuarioConExtension(datos) {
         datos.correo,
         contrasenaHash,
         datos.telefono || null,
-        rol.id_rol
+        rol.id_rol,
+        estadosActivos[0].id_estado
       ]
     );
 

@@ -6,7 +6,7 @@ import {
 import { crearToken } from '../utils/jwt.js';
 import { errorResponse, successResponse } from '../utils/api-response.js';
 
-function usuarioPublico(usuario) {
+export function usuarioPublico(usuario) {
   return {
     id_usuario: usuario.id_usuario,
     nombre: usuario.nombre,
@@ -14,7 +14,8 @@ function usuarioPublico(usuario) {
     documento_identidad: usuario.documento_identidad,
     correo: usuario.correo,
     telefono: usuario.telefono,
-    estado: usuario.estado,
+    id_estado: usuario.id_estado ?? null,
+    estado: usuario.estado ?? usuario.nombre_estado ?? null,
     id_rol: usuario.id_rol,
     nombre_rol: usuario.nombre_rol
   };
@@ -54,7 +55,7 @@ export async function iniciarSesion(req, res, next) {
       return errorResponse(res, 401, 'Correo o contraseña incorrectos', 'INVALID_CREDENTIALS');
     }
 
-    if (usuario.estado !== 'Activo') {
+    if ((usuario.estado ?? usuario.nombre_estado) !== 'Activo') {
       return errorResponse(res, 403, 'El usuario está inactivo', 'INACTIVE_USER');
     }
 

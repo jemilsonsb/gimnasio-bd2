@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import request from 'supertest';
 import { app } from '../src/app.js';
+import { usuarioPublico } from '../src/controllers/autenticacion.controller.js';
 import { crearToken } from '../src/utils/jwt.js';
 
 test('GET /api/health responde con el formato de éxito', async () => {
@@ -48,4 +49,25 @@ test('GET /api/autenticacion/sesion/cliente valida el rol del JWT', async () => 
 
   assert.equal(respuesta.status, 403);
   assert.equal(respuesta.body.error.code, 'FORBIDDEN');
+});
+
+test('usuarioPublico expone el estado del catálogo como texto', () => {
+  const usuario = {
+    id_usuario: 7,
+    nombre: 'Ana',
+    apellido: 'García',
+    documento_identidad: '12345678',
+    correo: 'ana@correo.com',
+    telefono: '999999999',
+    id_estado: 1,
+    nombre_estado: 'Activo',
+    id_rol: 2,
+    nombre_rol: 'Cliente'
+  };
+
+  const serializado = usuarioPublico(usuario);
+
+  assert.equal(serializado.estado, 'Activo');
+  assert.equal(serializado.id_estado, 1);
+  assert.equal(serializado.nombre_rol, 'Cliente');
 });

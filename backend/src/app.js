@@ -2,6 +2,9 @@ import cors from 'cors';
 import express from 'express';
 import autenticacionRoutes from './routes/autenticacion.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
+import planRoutes from './routes/plan.routes.js';
+import membresiaRoutes from './routes/membresia.routes.js';
+import clienteRoutes from './routes/cliente.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { successResponse } from './utils/api-response.js';
 
@@ -16,6 +19,9 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/autenticacion', autenticacionRoutes);
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/planes', planRoutes);
+app.use('/api/membresias', membresiaRoutes);
+app.use('/api/clientes', clienteRoutes);
 
 app.use((_req, res) => {
   return res.status(404).json({
