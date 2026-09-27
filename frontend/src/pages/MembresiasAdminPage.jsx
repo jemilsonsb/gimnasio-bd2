@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ModalAsignarMembresia } from '../components/membresia/ModalAsignarMembresia.jsx';
 import { ModalConfirmacion } from '../components/membresia/ModalConfirmacion.jsx';
+import { ModalPagos } from '../components/pago/ModalPagos.jsx';
 import { obtenerClientes } from '../services/cliente.service.js';
 import {
   asignarMembresia,
@@ -19,6 +20,7 @@ export function MembresiasAdminPage() {
   const [modalAsignarAbierto, setModalAsignarAbierto] = useState(false);
   const [membresiaACancelar, setMembresiaACancelar] = useState(null);
   const [cancelando, setCancelando] = useState(false);
+  const [membresiaParaPagos, setMembresiaParaPagos] = useState(null);
 
   useEffect(() => {
     document.title = 'Control de Membresías | Gimnasio BD2';
@@ -199,15 +201,24 @@ export function MembresiasAdminPage() {
                       </td>
                       <td className="px-4 py-3">{renderBadgeVigencia(m)}</td>
                       <td className="px-4 py-3 text-center">
-                        {m.estado_membresia === 'Activa' && (
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             type="button"
-                            onClick={() => setMembresiaACancelar(m)}
-                            className="rounded bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-200 transition"
+                            onClick={() => setMembresiaParaPagos(m)}
+                            className="rounded bg-sky-100 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-200 transition"
                           >
-                            Cancelar
+                            Pagos
                           </button>
-                        )}
+                          {m.estado_membresia === 'Activa' && (
+                            <button
+                              type="button"
+                              onClick={() => setMembresiaACancelar(m)}
+                              className="rounded bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-200 transition"
+                            >
+                              Cancelar
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -232,6 +243,12 @@ export function MembresiasAdminPage() {
         titulo="Cancelar Membresía"
         mensaje={`¿Estás seguro de que deseas cancelar la membresía activa de ${membresiaACancelar?.nombre_usuario} para el plan "${membresiaACancelar?.nombre_plan}"? Esta acción no se puede revertir.`}
         cargando={cancelando}
+      />
+
+      <ModalPagos
+        abierto={Boolean(membresiaParaPagos)}
+        alCerrar={() => setMembresiaParaPagos(null)}
+        membresia={membresiaParaPagos}
       />
     </>
   );

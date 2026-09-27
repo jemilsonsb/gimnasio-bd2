@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { obtenerHistorialUsuario } from '../services/membresia.service.js';
+import { obtenerPagosPorMembresia } from '../services/pago.service.js';
 
 export function MiMembresiaPage() {
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [perfilNoEncontrado, setPerfilNoEncontrado] = useState(false);
+  const [pagosActivos, setPagosActivos] = useState([]);
+  const [cargandoPagos, setCargandoPagos] = useState(false);
 
   const usuarioGuardado = localStorage.getItem('usuario');
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
@@ -30,6 +33,10 @@ export function MiMembresiaPage() {
     try {
       const respuesta = await obtenerHistorialUsuario(idUsuario);
       setDatos(respuesta.data);
+
+      if (respuesta.data?.membresia_activa?.id_membresia) {
+        cargarPagosMembresia(respuesta.data.membresia_activa.id_membresia);
+      }
     } catch (err) {
       if (err?.error?.code === 'CLIENT_PROFILE_NOT_FOUND') {
         setPerfilNoEncontrado(true);
@@ -38,6 +45,18 @@ export function MiMembresiaPage() {
       }
     } finally {
       setCargando(false);
+    }
+  }
+
+  async function cargarPagosMembresia(idMembresia) {
+    setCargandoPagos(true);
+    try {
+      const respPagos = await obtenerPagosPorMembresia(idMembresia);
+      setPagosActivos(respPagos?.data?.pagos || []);
+    } catch {
+      setPagosActivos([]);
+    } finally {
+      setCargandoPagos(false);
     }
   }
 
@@ -139,6 +158,72 @@ export function MiMembresiaPage() {
                   Actualmente no cuentas con un plan activo. Visita la recepción del gimnasio
                   para adquirir o renovar tu membresía.
                 </p>
+              </div>
+            )}
+
+            {/* Pagos de la Membresía Activa */}
+            {membresiaActiva && (
+              <div className="rounded-xl bg-white p-6 shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-slate-800">
+                    Historial de Pagos de mi Membresía
+                  </h3>
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                    Membresía #{membresiaActiva.id_membresia}
+                  </span>
+                </div>
+
+                {cargandoPagos ? (
+                  <p className="text-sm text-slate-500 py-4 text-center">
+                    Cargando pagos...
+                  </p>
+                ) : pagosActivos.length === 0 ? (
+                  <p className="text-sm text-slate-500 py-4 text-center">
+                    No hay registros de pago para tu membresía activa.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border border-slate-200 text-left text-sm">
+                      <thead className="bg-slate-800 text-white">
+                        <tr>
+                          <th className="px-4 py-3">Fecha de Pago</th>
+                          <th className="px-4 py-3">Monto</th>
+                          <th className="px-4 py-3">Método de Pago</th>
+                          <th className="px-4 py-3">Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pagosActivos.map((p) => (
+                          <tr
+                            key={p.id_pago}
+                            className="border-t border-slate-200 hover:bg-slate-50 transition"
+                          >
+                            <td className="px-4 py-3 text-slate-600">
+                              {p.fecha_pago ? new Date(p.fecha_pago).toLocaleDateString() : 'N/A'}
+                            </td>
+                            <td className="px-4 py-3 font-semibold text-slate-800">
+                              ${Number(p.monto).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3 text-slate-600">{p.metodo_pago}</td>
+                            <td className="px-4 py-3">
+                              <span
+                                className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                  p.estado_pago === 'Pagado'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : p.estado_pago === 'Pendiente'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {p.estado_pago}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
