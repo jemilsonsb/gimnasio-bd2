@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ModalAsignarMembresia } from '../components/membresia/ModalAsignarMembresia.jsx';
 import { ModalConfirmacion } from '../components/membresia/ModalConfirmacion.jsx';
+import { ModalEditarMembresia } from '../components/membresia/ModalEditarMembresia.jsx';
 import { ModalPagos } from '../components/pago/ModalPagos.jsx';
 import { obtenerClientes } from '../services/cliente.service.js';
 import {
@@ -21,6 +22,7 @@ export function MembresiasAdminPage() {
   const [membresiaACancelar, setMembresiaACancelar] = useState(null);
   const [cancelando, setCancelando] = useState(false);
   const [membresiaParaPagos, setMembresiaParaPagos] = useState(null);
+  const [membresiaAEditar, setMembresiaAEditar] = useState(null);
 
   useEffect(() => {
     document.title = 'Control de Membresías | Gimnasio BD2';
@@ -209,6 +211,15 @@ export function MembresiasAdminPage() {
                           >
                             Pagos
                           </button>
+                          {m.estado_membresia !== 'Cancelada' && (
+                            <button
+                              type="button"
+                              onClick={() => setMembresiaAEditar(m)}
+                              className="rounded bg-violet-100 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-200 transition"
+                            >
+                              Editar
+                            </button>
+                          )}
                           {m.estado_membresia === 'Activa' && (
                             <button
                               type="button"
@@ -249,6 +260,14 @@ export function MembresiasAdminPage() {
         abierto={Boolean(membresiaParaPagos)}
         alCerrar={() => setMembresiaParaPagos(null)}
         membresia={membresiaParaPagos}
+      />
+
+      <ModalEditarMembresia
+        abierto={Boolean(membresiaAEditar)}
+        alCerrar={() => setMembresiaAEditar(null)}
+        alGuardar={() => { setMembresiaAEditar(null); cargarDatos(); }}
+        membresia={membresiaAEditar}
+        planes={planes}
       />
     </>
   );

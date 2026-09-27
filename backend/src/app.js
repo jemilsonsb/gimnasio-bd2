@@ -6,6 +6,9 @@ import planRoutes from './routes/plan.routes.js';
 import membresiaRoutes from './routes/membresia.routes.js';
 import clienteRoutes from './routes/cliente.routes.js';
 import pagoRoutes from './routes/pago.routes.js';
+import ejercicioRoutes from './routes/ejercicio.routes.js';
+import rutinaRoutes from './routes/rutina.routes.js';
+import fichaTecnicaRoutes from './routes/ficha_tecnica.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { successResponse } from './utils/api-response.js';
 
@@ -24,6 +27,9 @@ app.use('/api/planes', planRoutes);
 app.use('/api/membresias', membresiaRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/pagos', pagoRoutes);
+app.use('/api/ejercicios', ejercicioRoutes);
+app.use('/api/rutinas', rutinaRoutes);
+app.use('/api/ficha-tecnica', fichaTecnicaRoutes);
 
 app.use((_req, res) => {
   return res.status(404).json({

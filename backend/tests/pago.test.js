@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import { after, test } from 'node:test';
 import request from 'supertest';
 import { app } from '../src/app.js';
+import { pool } from '../src/config/database.js';
 import { crearToken } from '../src/utils/jwt.js';
 
 test('POST /api/pagos rechaza registro sin token', async () => {
@@ -85,3 +86,8 @@ test('GET /api/pagos/membresia/:id rechaza a Cliente acceder a membresía que no
   );
   assert.equal(respuesta.body.success, false);
 });
+
+after(async () => {
+  await pool.end();
+});
+

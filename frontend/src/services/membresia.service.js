@@ -39,3 +39,11 @@ export function cancelarMembresia(idMembresia) {
     headers: headersAutenticados()
   });
 }
+
+export function editarMembresia(idMembresia, datos) {
+  return apiRequest(`/membresias/${idMembresia}`, {
+    method: 'PUT',
+    headers: headersAutenticados(),
+    body: JSON.stringify(datos)
+  });
+}

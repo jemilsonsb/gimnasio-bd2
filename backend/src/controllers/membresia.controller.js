@@ -1,6 +1,7 @@
 import {
   buscarMembresiaPorId,
   cancelarMembresia,
+  editarMembresia,
   listarMembresiasPorCliente,
   listarMembresiasPorUsuario,
   listarTodasMembresias,
@@ -151,6 +152,67 @@ export async function cancelarMembresiaController(req, res, next) {
     const cancelada = await cancelarMembresia(idMembresia);
     return successResponse(res, 200, 'Membresía cancelada correctamente', cancelada);
   } catch (error) {
+    return next(error);
+  }
+}
+
+export async function editarMembresiaController(req, res, next) {
+  try {
+    const idMembresia = Number(req.params.id);
+    if (isNaN(idMembresia) || idMembresia <= 0) {
+      return errorResponse(res, 400, 'El ID de la membresía no es válido', 'INVALID_ID');
+    }
+
+    const { fk_plan, fecha_inicio } = req.body;
+
+    // Debe llegarse al menos un campo a editar
+    if (fk_plan === undefined && fecha_inicio === undefined) {
+      return errorResponse(
+        res,
+        400,
+        'Debes enviar al menos uno de los campos: fk_plan o fecha_inicio',
+        'VALIDATION_ERROR'
+      );
+    }
+
+    // Validar fk_plan si se envía
+    if (fk_plan !== undefined) {
+      const idPlan = Number(fk_plan);
+      if (isNaN(idPlan) || idPlan <= 0) {
+        return errorResponse(res, 400, 'El ID de plan (fk_plan) no es válido', 'VALIDATION_ERROR');
+      }
+    }
+
+    // Validar formato de fecha_inicio si se envía (YYYY-MM-DD)
+    if (fecha_inicio !== undefined && fecha_inicio !== null && fecha_inicio !== '') {
+      const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!fechaRegex.test(String(fecha_inicio)) || isNaN(Date.parse(fecha_inicio))) {
+        return errorResponse(
+          res,
+          400,
+          "La fecha de inicio debe tener el formato válido 'YYYY-MM-DD'",
+          'VALIDATION_ERROR'
+        );
+      }
+    }
+
+    const membresiaActualizada = await editarMembresia(idMembresia, { fk_plan, fecha_inicio });
+
+    if (!membresiaActualizada) {
+      return errorResponse(res, 404, 'Membresía no encontrada', 'MEMBERSHIP_NOT_FOUND');
+    }
+
+    return successResponse(res, 200, 'Membresía actualizada correctamente', membresiaActualizada);
+  } catch (error) {
+    if (error.code === 'MEMBERSHIP_CANCELLED') {
+      return errorResponse(res, 400, error.message, error.code);
+    }
+    if (error.code === 'PLAN_NOT_FOUND') {
+      return errorResponse(res, 404, error.message, error.code);
+    }
+    if (error.code === 'PLAN_INACTIVE') {
+      return errorResponse(res, 400, error.message, error.code);
+    }
     return next(error);
   }
 }

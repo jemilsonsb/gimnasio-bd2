@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   cancelarMembresiaController,
   crearMembresia,
+  editarMembresiaController,
   obtenerHistorialCliente,
   obtenerHistorialUsuario,
   obtenerTodasMembresias
@@ -52,6 +53,14 @@ router.patch(
   autenticarUsuario,
   autorizarRoles('Administrador'),
   cancelarMembresiaController
+);
+
+// Editar fecha_inicio y/o plan de una membresía (solo Administrador)
+router.put(
+  '/:id',
+  autenticarUsuario,
+  autorizarRoles('Administrador'),
+  editarMembresiaController
 );
 
 export default router;

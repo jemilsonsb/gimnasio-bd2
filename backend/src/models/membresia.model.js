@@ -254,3 +254,60 @@ export async function cancelarMembresia(idMembresia) {
 
   return buscarMembresiaPorId(idMembresia);
 }
+
+export async function editarMembresia(idMembresia, { fk_plan, fecha_inicio }) {
+  // 1. Obtener membresía actual para conocer plan y fecha_inicio vigentes
+  const membresiaActual = await buscarMembresiaPorId(idMembresia);
+  if (!membresiaActual) {
+    return null; // El controlador responderá 404
+  }
+
+  if (membresiaActual.estado_membresia === 'Cancelada') {
+    const error = new Error('No se puede editar una membresía cancelada');
+    error.code = 'MEMBERSHIP_CANCELLED';
+    throw error;
+  }
+
+  // 2. Determinar el plan final (el enviado o el actual)
+  const idPlanFinal = fk_plan ? Number(fk_plan) : membresiaActual.fk_plan;
+
+  // 3. Validar existencia y estado del plan final
+  const [planes] = await pool.execute(
+    `SELECT id_plan, nombre_plan, duracion_dias, precio, activo
+     FROM plan
+     WHERE id_plan = ?
+     LIMIT 1`,
+    [idPlanFinal]
+  );
+
+  if (planes.length === 0) {
+    const error = new Error('El plan especificado no existe');
+    error.code = 'PLAN_NOT_FOUND';
+    throw error;
+  }
+
+  const plan = planes[0];
+  if (!plan.activo) {
+    const error = new Error('El plan seleccionado se encuentra desactivado');
+    error.code = 'PLAN_INACTIVE';
+    throw error;
+  }
+
+  // 4. Determinar la fecha de inicio final (la enviada o la actual del registro)
+  const fechaInicioFinal = fecha_inicio && String(fecha_inicio).trim() !== ''
+    ? String(fecha_inicio).trim()
+    : membresiaActual.fecha_inicio; // valor ya guardado en BD (formato YYYY-MM-DD)
+
+  // 5. Actualizar: recalcula fecha_vencimiento y precio_pagado
+  await pool.execute(
+    `UPDATE membresia
+     SET fk_plan          = ?,
+         fecha_inicio     = ?,
+         fecha_vencimiento = DATE_ADD(?, INTERVAL ? DAY),
+         precio_pagado    = ?
+     WHERE id_membresia   = ?`,
+    [idPlanFinal, fechaInicioFinal, fechaInicioFinal, plan.duracion_dias, plan.precio, idMembresia]
+  );
+
+  return buscarMembresiaPorId(idMembresia);
+}
