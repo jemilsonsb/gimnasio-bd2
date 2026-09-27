@@ -1,10 +1,14 @@
 import { BrowserRouter, Route, Routes, Outlet } from 'react-router-dom';
 import { DashboardPage } from '../pages/DashboardPage.jsx';
+import { EjerciciosAdminPage } from '../pages/EjerciciosAdminPage.jsx';
 import { LoginPage } from '../pages/LoginPage.jsx';
 import { MembresiasAdminPage } from '../pages/MembresiasAdminPage.jsx';
+import { MiFichaTecnicaPage } from '../pages/MiFichaTecnicaPage.jsx';
 import { MiMembresiaPage } from '../pages/MiMembresiaPage.jsx';
+import { MiRutinaPage } from '../pages/MiRutinaPage.jsx';
 import { PlanesAdminPage } from '../pages/PlanesAdminPage.jsx';
 import { RegisterPage } from '../pages/RegisterPage.jsx';
+import { RutinasAdminPage } from '../pages/RutinasAdminPage.jsx';
 import { UsersPage } from '../pages/UsersPage.jsx';
 import { ProtectedRoute } from './ProtectedRoute.jsx';
 import { AppLayout } from '../components/layout/AppLayout.jsx';
@@ -64,10 +68,42 @@ export function AppRoutes() {
             }
           />
           <Route
+            path="/admin/ejercicios"
+            element={
+              <ProtectedRoute rolesPermitidos={['Administrador', 'Entrenador']}>
+                <EjerciciosAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/rutinas"
+            element={
+              <ProtectedRoute rolesPermitidos={['Administrador', 'Entrenador']}>
+                <RutinasAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/mi-membresia"
             element={
               <ProtectedRoute rolPermitido="Cliente">
                 <MiMembresiaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mi-rutina"
+            element={
+              <ProtectedRoute rolPermitido="Cliente">
+                <MiRutinaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mi-ficha-tecnica"
+            element={
+              <ProtectedRoute rolPermitido="Cliente">
+                <MiFichaTecnicaPage />
               </ProtectedRoute>
             }
           />

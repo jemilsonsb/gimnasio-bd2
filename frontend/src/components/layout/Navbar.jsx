@@ -43,24 +43,42 @@ export function Navbar() {
               Dashboard
             </Link>
 
-            {rol === 'Administrador' && (
+            {(rol === 'Administrador' || rol === 'Entrenador') && (
               <>
-                <Link to="/usuarios" className={claseEnlace('/usuarios')}>
-                  Usuarios
+                {rol === 'Administrador' && (
+                  <>
+                    <Link to="/usuarios" className={claseEnlace('/usuarios')}>
+                      Usuarios
+                    </Link>
+                    <Link to="/admin/planes" className={claseEnlace('/admin/planes')}>
+                      Planes
+                    </Link>
+                    <Link to="/admin/membresias" className={claseEnlace('/admin/membresias')}>
+                      Membresías
+                    </Link>
+                  </>
+                )}
+                <Link to="/admin/ejercicios" className={claseEnlace('/admin/ejercicios')}>
+                  Ejercicios
                 </Link>
-                <Link to="/admin/planes" className={claseEnlace('/admin/planes')}>
-                  Planes
-                </Link>
-                <Link to="/admin/membresias" className={claseEnlace('/admin/membresias')}>
-                  Membresías
+                <Link to="/admin/rutinas" className={claseEnlace('/admin/rutinas')}>
+                  Rutinas
                 </Link>
               </>
             )}
 
             {rol === 'Cliente' && (
-              <Link to="/mi-membresia" className={claseEnlace('/mi-membresia')}>
-                Mi Membresía
-              </Link>
+              <>
+                <Link to="/mi-membresia" className={claseEnlace('/mi-membresia')}>
+                  Mi Membresía
+                </Link>
+                <Link to="/mi-rutina" className={claseEnlace('/mi-rutina')}>
+                  Mi Rutina
+                </Link>
+                <Link to="/mi-ficha-tecnica" className={claseEnlace('/mi-ficha-tecnica')}>
+                  Mi Ficha Técnica
+                </Link>
+              </>
             )}
           </nav>
         </div>
@@ -75,6 +93,8 @@ export function Navbar() {
                 className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
                   rol === 'Administrador'
                     ? 'bg-purple-100 text-purple-800'
+                    : rol === 'Entrenador'
+                    ? 'bg-sky-100 text-sky-800'
                     : 'bg-emerald-100 text-emerald-800'
                 }`}
               >
