@@ -86,8 +86,7 @@ export function ModalFichaTecnica({ abierto, alCerrar, cliente }) {
         objetivos: objetivos.trim() || null
       });
 
-      setExito('Ficha técnica guardada exitosamente.');
-      await cargarFicha();
+      alCerrar();
     } catch (err) {
       setError(err?.message || 'Error al guardar la ficha técnica.');
     } finally {

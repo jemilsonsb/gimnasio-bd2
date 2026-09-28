@@ -9,6 +9,9 @@ import pagoRoutes from './routes/pago.routes.js';
 import ejercicioRoutes from './routes/ejercicio.routes.js';
 import rutinaRoutes from './routes/rutina.routes.js';
 import fichaTecnicaRoutes from './routes/ficha_tecnica.routes.js';
+import claseRoutes from './routes/clase.routes.js';
+import programacionClaseRoutes from './routes/programacion_clase.routes.js';
+import reservaClaseRoutes from './routes/reserva_clase.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { successResponse } from './utils/api-response.js';
 
@@ -30,6 +33,9 @@ app.use('/api/pagos', pagoRoutes);
 app.use('/api/ejercicios', ejercicioRoutes);
 app.use('/api/rutinas', rutinaRoutes);
 app.use('/api/ficha-tecnica', fichaTecnicaRoutes);
+app.use('/api/clases', claseRoutes);
+app.use('/api/programaciones', programacionClaseRoutes);
+app.use('/api/reservas', reservaClaseRoutes);
 
 app.use((_req, res) => {
   return res.status(404).json({
