@@ -13,6 +13,14 @@ export function obtenerUsuarios() {
   });
 }
 
+export function crearUsuario(datos) {
+  return apiRequest('/usuarios', {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(datos)
+  });
+}
+
 export function actualizarEstadoUsuario(idUsuario, estado) {
   return apiRequest(`/usuarios/${idUsuario}/estado`, {
     method: 'PATCH',

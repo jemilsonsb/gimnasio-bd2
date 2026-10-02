@@ -2,6 +2,7 @@ import {
 	cambiarEstadoUsuario,
 	listarUsuarios
 } from '../models/usuario.model.js';
+import { crearUsuarioConExtension } from '../models/autenticacion.model.js';
 import { errorResponse, successResponse } from '../utils/api-response.js';
 
 export async function obtenerUsuarios(_req, res, next) {
@@ -9,6 +10,31 @@ export async function obtenerUsuarios(_req, res, next) {
 		const usuarios = await listarUsuarios();
 		return successResponse(res, 200, 'Usuarios obtenidos correctamente', usuarios);
 	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function crearUsuarioController(req, res, next) {
+	try {
+		const usuario = await crearUsuarioConExtension({
+			nombre: req.body.nombre.trim(),
+			apellido: req.body.apellido.trim(),
+			documentoIdentidad: req.body.documento_identidad.trim(),
+			correo: req.body.correo.trim().toLowerCase(),
+			contrasena: req.body.contrasena,
+			telefono: req.body.telefono?.trim(),
+			nombreRol: req.body.nombre_rol,
+			codigoMiembro: req.body.codigo_miembro?.trim()
+		});
+
+		return successResponse(res, 201, 'Usuario creado correctamente', usuario);
+	} catch (error) {
+		if (error.code === 'ER_DUP_ENTRY') {
+			return errorResponse(res, 409, 'El documento o correo ya está registrado', 'DUPLICATE_USER');
+		}
+		if (error.code === 'ROLE_NOT_FOUND') {
+			return errorResponse(res, 400, error.message, error.code);
+		}
 		return next(error);
 	}
 }

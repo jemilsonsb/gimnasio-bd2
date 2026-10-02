@@ -1,30 +1,37 @@
 import { useEffect, useState } from 'react';
 import {
   actualizarEstadoUsuario,
+  crearUsuario,
   obtenerUsuarios
 } from '../services/usuario.service.js';
+import { ModalCrearUsuario } from '../components/usuario/ModalCrearUsuario.jsx';
 
 export function UsersPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
+
+  async function cargarUsuarios() {
+    try {
+      const respuesta = await obtenerUsuarios();
+      setUsuarios(respuesta.data);
+    } catch (respuestaError) {
+      setError(respuestaError?.message || 'No se pudieron cargar los usuarios.');
+    } finally {
+      setCargando(false);
+    }
+  }
 
   useEffect(() => {
     document.title = 'Administración de usuarios';
-
-    async function cargarUsuarios() {
-      try {
-        const respuesta = await obtenerUsuarios();
-        setUsuarios(respuesta.data);
-      } catch (respuestaError) {
-        setError(respuestaError?.message || 'No se pudieron cargar los usuarios.');
-      } finally {
-        setCargando(false);
-      }
-    }
-
     cargarUsuarios();
   }, []);
+
+  async function crearNuevoUsuario(datos) {
+    await crearUsuario(datos);
+    await cargarUsuarios();
+  }
 
   async function cambiarEstado(usuario) {
     const nuevoEstado = usuario.estado === 'Activo' ? 'Inactivo' : 'Activo';
@@ -42,8 +49,9 @@ export function UsersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-6xl rounded-xl bg-white p-6 shadow-md">
+    <>
+      <main className="min-h-screen bg-slate-100 p-6">
+        <div className="mx-auto max-w-6xl rounded-xl bg-white p-6 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
@@ -51,6 +59,13 @@ export function UsersPage() {
             </p>
             <h1 className="text-3xl font-bold text-slate-800">Usuarios</h1>
           </div>
+          <button
+            type="button"
+            onClick={() => setModalCrearAbierto(true)}
+            className="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700 transition"
+          >
+            Nuevo usuario
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -105,7 +120,14 @@ export function UsersPage() {
             </tbody>
           </table>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+
+      <ModalCrearUsuario
+        abierto={modalCrearAbierto}
+        alCerrar={() => setModalCrearAbierto(false)}
+        alGuardar={crearNuevoUsuario}
+      />
+    </>
   );
 }

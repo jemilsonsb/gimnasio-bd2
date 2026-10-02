@@ -30,7 +30,7 @@ export async function registrar(req, res, next) {
       correo: req.body.correo.trim().toLowerCase(),
       contrasena: req.body.contrasena,
       telefono: req.body.telefono?.trim(),
-      nombreRol: req.body.nombre_rol || 'Cliente',
+      nombreRol: 'Cliente',
       codigoMiembro: req.body.codigo_miembro?.trim()
     });
 
