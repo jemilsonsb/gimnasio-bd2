@@ -287,6 +287,22 @@ test('PATCH /api/reservas/999999/cancelar responde 404 o 403 para Cliente con re
   assert.equal(r.body.success, false);
 });
 
+test('PATCH /api/reservas/:id/asistio rechaza sin token', async () => {
+  const r = await request(app).patch('/api/reservas/1/asistio');
+  assert.equal(r.status, 401);
+  assert.equal(r.body.success, false);
+  assert.equal(r.body.error.code, 'UNAUTHORIZED');
+});
+
+test('PATCH /api/reservas/:id/asistio rechaza para rol Cliente', async () => {
+  const r = await request(app)
+    .patch('/api/reservas/1/asistio')
+    .set('Authorization', `Bearer ${tokenCliente}`);
+  assert.equal(r.status, 403);
+  assert.equal(r.body.success, false);
+  assert.equal(r.body.error.code, 'FORBIDDEN');
+});
+
 after(async () => {
   await pool.end();
 });

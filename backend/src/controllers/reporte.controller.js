@@ -1,4 +1,5 @@
 import {
+  obtenerReporteAsistencias as obtenerReporteAsistenciasModel,
   obtenerReporteClases as obtenerReporteClasesModel,
   obtenerReporteClientes as obtenerReporteClientesModel,
   obtenerReporteIngresos as obtenerReporteIngresosModel,
@@ -169,6 +170,41 @@ export async function obtenerReporteClasesController(req, res, next) {
     });
 
     return successResponse(res, 200, 'Reporte de clases obtenido correctamente', reporte);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function obtenerReporteAsistenciasController(req, res, next) {
+  const { fecha_inicio, fecha_fin, fk_cliente, fk_plan } = req.query;
+
+  const vFechaInicio = validarFecha(fecha_inicio);
+  const vFechaFin = validarFecha(fecha_fin);
+  const vFkCliente = validarId(fk_cliente);
+  const vFkPlan = validarId(fk_plan);
+
+  if (!vFechaInicio.valido) {
+    return errorResponse(res, 400, "fecha_inicio debe tener el formato 'YYYY-MM-DD'", 'VALIDATION_ERROR');
+  }
+  if (!vFechaFin.valido) {
+    return errorResponse(res, 400, "fecha_fin debe tener el formato 'YYYY-MM-DD'", 'VALIDATION_ERROR');
+  }
+  if (!vFkCliente.valido) {
+    return errorResponse(res, 400, 'El ID de cliente (fk_cliente) no es válido', 'VALIDATION_ERROR');
+  }
+  if (!vFkPlan.valido) {
+    return errorResponse(res, 400, 'El ID de plan (fk_plan) no es válido', 'VALIDATION_ERROR');
+  }
+
+  try {
+    const reporte = await obtenerReporteAsistenciasModel({
+      fechaInicio: vFechaInicio.valor,
+      fechaFin: vFechaFin.valor,
+      fkCliente: vFkCliente.valor,
+      fkPlan: vFkPlan.valor
+    });
+
+    return successResponse(res, 200, 'Reporte de asistencias obtenido correctamente', reporte);
   } catch (error) {
     return next(error);
   }

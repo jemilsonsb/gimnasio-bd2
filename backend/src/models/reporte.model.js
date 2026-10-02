@@ -343,6 +343,70 @@ export async function obtenerReporteClientes({ fechaInicio, fechaFin, estado } =
   };
 }
 
+export async function obtenerReporteAsistencias({ fechaInicio, fechaFin, fkCliente, fkPlan } = {}) {
+  const condiciones = [];
+  const parametros = [];
+  if (fechaInicio) {
+    condiciones.push('a.fecha >= ?');
+    parametros.push(fechaInicio);
+  }
+  if (fechaFin) {
+    condiciones.push('a.fecha <= ?');
+    parametros.push(fechaFin);
+  }
+  if (fkCliente) {
+    condiciones.push('m.fk_cliente = ?');
+    parametros.push(fkCliente);
+  }
+  if (fkPlan) {
+    condiciones.push('m.fk_plan = ?');
+    parametros.push(fkPlan);
+  }
+  const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
+
+  const [[{ total_ingresos }]] = await pool.execute(
+    `SELECT COUNT(*) AS total_ingresos
+     FROM asistencia a
+     INNER JOIN membresia m ON m.id_membresia = a.fk_membresia
+     ${where}`,
+    parametros
+  );
+
+  const [porPlan] = await pool.execute(
+    `SELECT pl.id_plan, pl.nombre_plan, COUNT(*) AS cantidad
+     FROM asistencia a
+     INNER JOIN membresia m ON m.id_membresia = a.fk_membresia
+     INNER JOIN plan pl ON pl.id_plan = m.fk_plan
+     ${where}
+     GROUP BY pl.id_plan, pl.nombre_plan`,
+    parametros
+  );
+
+  const [detalle] = await pool.execute(
+    `SELECT
+       a.id_asistencia, a.fecha, a.fecha_hora,
+       m.id_membresia, m.fk_cliente, c.codigo_miembro,
+       CONCAT(u.nombre, ' ', u.apellido) AS nombre_cliente, u.correo AS correo_cliente,
+       pl.id_plan, pl.nombre_plan
+     FROM asistencia a
+     INNER JOIN membresia m ON m.id_membresia = a.fk_membresia
+     INNER JOIN cliente c ON c.id_cliente = m.fk_cliente
+     INNER JOIN usuario u ON u.id_usuario = c.fk_usuario
+     INNER JOIN plan pl ON pl.id_plan = m.fk_plan
+     ${where}
+     ORDER BY a.fecha DESC, a.fecha_hora DESC`,
+    parametros
+  );
+
+  return {
+    resumen: {
+      total_ingresos: Number(total_ingresos),
+      por_plan: porPlan
+    },
+    detalle
+  };
+}
+
 export async function obtenerReporteRutinas({
   fkEntrenador,
   fkCliente,

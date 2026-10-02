@@ -108,6 +108,7 @@ export function PlanesAdminPage() {
                   <th className="px-4 py-3">Descripción</th>
                   <th className="px-4 py-3">Duración</th>
                   <th className="px-4 py-3">Precio</th>
+                  <th className="px-4 py-3">Ingresos</th>
                   <th className="px-4 py-3">Estado</th>
                   <th className="px-4 py-3 text-center">Acciones</th>
                 </tr>
@@ -129,6 +130,9 @@ export function PlanesAdminPage() {
                     </td>
                     <td className="px-4 py-3 font-semibold text-slate-800">
                       ${Number(plan.precio).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">
+                      {plan.ingresos_incluidos ?? 'Ilimitado'}
                     </td>
                     <td className="px-4 py-3">
                       <span

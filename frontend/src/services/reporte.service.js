@@ -47,3 +47,9 @@ export function obtenerReporteRutinas(filtros) {
     headers: headersAutenticados()
   });
 }
+
+export function obtenerReporteAsistencias(filtros) {
+  return apiRequest(`/reportes/asistencias${construirQuery(filtros)}`, {
+    headers: headersAutenticados()
+  });
+}

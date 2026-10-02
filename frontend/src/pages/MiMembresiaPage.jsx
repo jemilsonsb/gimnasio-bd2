@@ -1,6 +1,20 @@
 import { useEffect, useState } from 'react';
+import { obtenerMisAsistencias } from '../services/asistencia.service.js';
 import { obtenerHistorialUsuario } from '../services/membresia.service.js';
 import { obtenerPagosPorMembresia } from '../services/pago.service.js';
+
+const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+function obtenerDiasDelMes(mes) {
+  const [anio, mesNumero] = mes.split('-').map(Number);
+  return new Date(anio, mesNumero, 0).getDate();
+}
+
+function obtenerOffsetInicio(mes) {
+  const [anio, mesNumero] = mes.split('-').map(Number);
+  const diaSemana = new Date(anio, mesNumero - 1, 1).getDay();
+  return (diaSemana + 6) % 7; // 0 = Lunes
+}
 
 export function MiMembresiaPage() {
   const [datos, setDatos] = useState(null);
@@ -9,6 +23,8 @@ export function MiMembresiaPage() {
   const [perfilNoEncontrado, setPerfilNoEncontrado] = useState(false);
   const [pagosActivos, setPagosActivos] = useState([]);
   const [cargandoPagos, setCargandoPagos] = useState(false);
+  const [asistencias, setAsistencias] = useState(null);
+  const [cargandoAsistencias, setCargandoAsistencias] = useState(false);
 
   const usuarioGuardado = localStorage.getItem('usuario');
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
@@ -23,7 +39,20 @@ export function MiMembresiaPage() {
     }
 
     cargarHistorial(usuario.id_usuario);
+    cargarAsistencias();
   }, []);
+
+  async function cargarAsistencias() {
+    setCargandoAsistencias(true);
+    try {
+      const respuesta = await obtenerMisAsistencias();
+      setAsistencias(respuesta.data);
+    } catch {
+      setAsistencias(null);
+    } finally {
+      setCargandoAsistencias(false);
+    }
+  }
 
   async function cargarHistorial(idUsuario) {
     setCargando(true);
@@ -158,6 +187,82 @@ export function MiMembresiaPage() {
                   Actualmente no cuentas con un plan activo. Visita la recepción del gimnasio
                   para adquirir o renovar tu membresía.
                 </p>
+              </div>
+            )}
+
+            {/* Asistencia del mes */}
+            {asistencias && (
+              <div className="rounded-xl bg-white p-6 shadow-md">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800">Mi Asistencia</h3>
+                    {membresiaActiva && (
+                      <p className="text-sm text-slate-600 mt-1">
+                        Compraste tu membresía el{' '}
+                        {membresiaActiva.creado_en
+                          ? new Date(membresiaActiva.creado_en).toLocaleDateString()
+                          : 'N/A'}
+                        .
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-right">
+                    <p className="text-xs font-semibold uppercase text-sky-700">Ingresos</p>
+                    {asistencias.membresia_vigente ? (
+                      asistencias.membresia_vigente.ingresos_incluidos === null ? (
+                        <p className="text-lg font-bold text-sky-900">Ilimitado</p>
+                      ) : (
+                        <p className="text-lg font-bold text-sky-900">
+                          {asistencias.membresia_vigente.ingresos_restantes} restantes
+                          <span className="block text-xs font-normal text-sky-700">
+                            de {asistencias.membresia_vigente.ingresos_incluidos} (
+                            {asistencias.membresia_vigente.ingresos_usados} usados)
+                          </span>
+                        </p>
+                      )
+                    ) : (
+                      <p className="text-sm text-sky-800">Sin membresía vigente</p>
+                    )}
+                  </div>
+                </div>
+
+                {cargandoAsistencias ? (
+                  <p className="text-sm text-slate-500 py-4 text-center">Cargando calendario...</p>
+                ) : (
+                  <div className="mt-4">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Días asistidos en {asistencias.mes}
+                    </p>
+                    <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                      {DIAS_SEMANA.map((dia) => (
+                        <div key={dia} className="py-1 font-semibold text-slate-500">
+                          {dia}
+                        </div>
+                      ))}
+                      {Array.from({ length: obtenerOffsetInicio(asistencias.mes) }).map((_, indice) => (
+                        <div key={`vacio-${indice}`} />
+                      ))}
+                      {Array.from({ length: obtenerDiasDelMes(asistencias.mes) }).map((_, indice) => {
+                        const dia = indice + 1;
+                        const fecha = `${asistencias.mes}-${String(dia).padStart(2, '0')}`;
+                        const asistio = asistencias.dias_asistidos.includes(fecha);
+                        return (
+                          <div
+                            key={fecha}
+                            className={`rounded-md py-2 font-medium ${
+                              asistio
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {dia}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

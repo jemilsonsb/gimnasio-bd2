@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   cancelarReservaController,
   crearReservaController,
+  marcarAsistioController,
   obtenerMisReservasController
 } from '../controllers/reserva_clase.controller.js';
 import { autenticarUsuario } from '../middlewares/auth.middleware.js';
@@ -30,6 +31,13 @@ router.patch(
   autenticarUsuario,
   autorizarRoles('Cliente', 'Administrador'),
   cancelarReservaController
+);
+
+router.patch(
+  '/:id/asistio',
+  autenticarUsuario,
+  autorizarRoles('Administrador', 'Entrenador'),
+  marcarAsistioController
 );
 
 export default router;

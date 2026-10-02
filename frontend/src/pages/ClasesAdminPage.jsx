@@ -4,6 +4,7 @@ import { ModalProgramarClase } from '../components/clase/ModalProgramarClase.jsx
 import { ModalVerAsistentes } from '../components/clase/ModalVerAsistentes.jsx';
 import {
   cancelarReserva,
+  marcarAsistio,
   obtenerClases,
   obtenerProgramaciones,
   parsearErrorBackend
@@ -55,6 +56,11 @@ export function ClasesAdminPage() {
 
   async function handleCancelarReservaAsistente(idReserva) {
     await cancelarReserva(idReserva);
+    await cargarDatos();
+  }
+
+  async function handleMarcarAsistioAsistente(idReserva) {
+    await marcarAsistio(idReserva);
     await cargarDatos();
   }
 
@@ -242,7 +248,9 @@ export function ClasesAdminPage() {
         abierto={Boolean(programacionParaAsistentes)}
         alCerrar={() => setProgramacionParaAsistentes(null)}
         programacion={programacionParaAsistentes}
+        rolUsuario={rolUsuario}
         alCancelarReserva={handleCancelarReservaAsistente}
+        alMarcarAsistio={handleMarcarAsistioAsistente}
       />
     </>
   );

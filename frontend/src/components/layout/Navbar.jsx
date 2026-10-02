@@ -56,6 +56,9 @@ export function Navbar() {
                     <Link to="/admin/membresias" className={claseEnlace('/admin/membresias')}>
                       Membresías
                     </Link>
+                    <Link to="/admin/asistencias" className={claseEnlace('/admin/asistencias')}>
+                      Asistencias
+                    </Link>
                   </>
                 )}
                 <Link to="/admin/ejercicios" className={claseEnlace('/admin/ejercicios')}>

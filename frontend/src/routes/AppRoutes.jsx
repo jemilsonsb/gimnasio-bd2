@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes, Outlet } from 'react-router-dom';
+import { AsistenciasAdminPage } from '../pages/AsistenciasAdminPage.jsx';
 import { ClasesAdminPage } from '../pages/ClasesAdminPage.jsx';
 import { DashboardPage } from '../pages/DashboardPage.jsx';
 import { EjerciciosAdminPage } from '../pages/EjerciciosAdminPage.jsx';
@@ -68,6 +69,14 @@ export function AppRoutes() {
             element={
               <ProtectedRoute rolPermitido="Administrador">
                 <MembresiasAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/asistencias"
+            element={
+              <ProtectedRoute rolPermitido="Administrador">
+                <AsistenciasAdminPage />
               </ProtectedRoute>
             }
           />

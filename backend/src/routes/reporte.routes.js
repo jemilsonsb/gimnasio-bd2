@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  obtenerReporteAsistenciasController,
   obtenerReporteClasesController,
   obtenerReporteClientesController,
   obtenerReporteIngresosController,
@@ -18,5 +19,6 @@ reporteRoutes.get('/membresias', autorizarRoles('Administrador'), obtenerReporte
 reporteRoutes.get('/clientes', autorizarRoles('Administrador'), obtenerReporteClientesController);
 reporteRoutes.get('/clases', autorizarRoles('Administrador', 'Entrenador'), obtenerReporteClasesController);
 reporteRoutes.get('/rutinas', autorizarRoles('Administrador', 'Entrenador'), obtenerReporteRutinasController);
+reporteRoutes.get('/asistencias', autorizarRoles('Administrador'), obtenerReporteAsistenciasController);
 
 export default reporteRoutes;

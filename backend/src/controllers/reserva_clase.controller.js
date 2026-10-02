@@ -2,9 +2,11 @@ import {
   buscarReservaPorId,
   cancelarReservaSegura,
   crearReservaSegura,
-  listarReservasPorCliente
+  listarReservasPorCliente,
+  marcarAsistioSegura
 } from '../models/reserva_clase.model.js';
 import { buscarClientePorUsuario } from '../models/cliente.model.js';
+import { buscarEntrenadorPorUsuario } from '../models/entrenador.model.js';
 import { errorResponse, successResponse } from '../utils/api-response.js';
 
 const ERRORES_RESERVA = {
@@ -14,7 +16,11 @@ const ERRORES_RESERVA = {
   NO_CUPOS_DISPONIBLES: [409, 'No hay cupos disponibles para esta clase'],
   MEMBERSHIP_REQUIRED: [403, 'Se requiere una membresía activa para reservar clases'],
   ALREADY_CANCELLED: [409, 'La reserva ya está cancelada'],
-  RESERVA_ASISTIDA: [409, 'No se puede cancelar una reserva con asistencia registrada']
+  RESERVA_ASISTIDA: [409, 'No se puede cancelar una reserva con asistencia registrada'],
+  RESERVA_CANCELADA: [400, 'La reserva está cancelada'],
+  RESERVA_YA_ASISTIO: [400, 'La asistencia ya fue registrada'],
+  CLASE_FUTURA: [400, 'No se puede marcar asistencia de una clase futura'],
+  FORBIDDEN_CLASE_AJENA: [403, 'No puedes marcar asistencia de una clase que no es tuya']
 };
 
 /** Utilidad: resuelve el id_cliente del usuario autenticado */
@@ -143,6 +149,44 @@ export async function cancelarReservaController(req, res, next) {
     }
 
     return successResponse(res, 200, 'Reserva cancelada exitosamente', reservaCancelada);
+  } catch (error) {
+    const info = ERRORES_RESERVA[error.code];
+    if (info) {
+      return errorResponse(res, info[0], info[1], error.code);
+    }
+    return next(error);
+  }
+}
+
+export async function marcarAsistioController(req, res, next) {
+  const idReserva = Number(req.params.id);
+  if (isNaN(idReserva) || idReserva <= 0) {
+    return errorResponse(res, 400, 'El ID de reserva no es válido', 'INVALID_ID');
+  }
+
+  try {
+    const usuarioAuth = req.usuarioAutenticado;
+    let idEntrenador = null;
+
+    if (usuarioAuth.nombre_rol === 'Entrenador') {
+      const perfilEntrenador = await buscarEntrenadorPorUsuario(usuarioAuth.id_usuario);
+      if (!perfilEntrenador) {
+        return errorResponse(
+          res,
+          404,
+          'El usuario no tiene un perfil de entrenador asociado',
+          'ENTRENADOR_PROFILE_NOT_FOUND'
+        );
+      }
+      idEntrenador = perfilEntrenador.id_entrenador;
+    }
+
+    const reserva = await marcarAsistioSegura(idReserva, { idEntrenador });
+    if (!reserva) {
+      return errorResponse(res, 404, 'Reserva no encontrada', 'RESERVA_NOT_FOUND');
+    }
+
+    return successResponse(res, 200, 'Asistencia registrada exitosamente', reserva);
   } catch (error) {
     const info = ERRORES_RESERVA[error.code];
     if (info) {

@@ -208,3 +208,77 @@ export async function cancelarReservaSegura(idReserva) {
     conexion.release();
   }
 }
+
+/**
+ * Marca la asistencia de una reserva de forma atómica:
+ *  - Solo reservas 'Confirmada' de clases de hoy o anteriores (CURDATE() de la BD)
+ *  - Un Entrenador solo puede marcar reservas de sus propias programaciones (idEntrenador)
+ *  - No devuelve el cupo (a diferencia de cancelarReservaSegura)
+ */
+export async function marcarAsistioSegura(idReserva, { idEntrenador = null } = {}) {
+  const conexion = await pool.getConnection();
+  try {
+    await conexion.beginTransaction();
+
+    // Bloquear reserva y traer datos de su programación
+    const [filasReserva] = await conexion.execute(
+      `SELECT r.id_reserva, r.estado_reserva, r.fk_programacion, pc.fecha, pc.fk_entrenador
+       FROM reserva_clase r
+       INNER JOIN programacion_clase pc ON pc.id_programacion = r.fk_programacion
+       WHERE r.id_reserva = ?
+       LIMIT 1
+       FOR UPDATE`,
+      [idReserva]
+    );
+
+    if (filasReserva.length === 0) {
+      await conexion.rollback();
+      return null; // 404 en el controlador
+    }
+
+    const reserva = filasReserva[0];
+
+    if (reserva.estado_reserva === 'Cancelada') {
+      await conexion.rollback();
+      const error = new Error('La reserva está cancelada');
+      error.code = 'RESERVA_CANCELADA';
+      throw error;
+    }
+
+    if (reserva.estado_reserva === 'Asistio') {
+      await conexion.rollback();
+      const error = new Error('La asistencia ya fue registrada');
+      error.code = 'RESERVA_YA_ASISTIO';
+      throw error;
+    }
+
+    const [filasHoy] = await conexion.execute('SELECT CURDATE() AS hoy');
+    const hoy = filasHoy[0].hoy;
+    if (reserva.fecha > hoy) {
+      await conexion.rollback();
+      const error = new Error('No se puede marcar asistencia de una clase futura');
+      error.code = 'CLASE_FUTURA';
+      throw error;
+    }
+
+    if (idEntrenador !== null && reserva.fk_entrenador !== idEntrenador) {
+      await conexion.rollback();
+      const error = new Error('No puedes marcar asistencia de una clase que no es tuya');
+      error.code = 'FORBIDDEN_CLASE_AJENA';
+      throw error;
+    }
+
+    await conexion.execute(
+      `UPDATE reserva_clase SET estado_reserva = 'Asistio' WHERE id_reserva = ?`,
+      [idReserva]
+    );
+
+    await conexion.commit();
+    return buscarReservaPorId(idReserva);
+  } catch (error) {
+    await conexion.rollback();
+    throw error;
+  } finally {
+    conexion.release();
+  }
+}

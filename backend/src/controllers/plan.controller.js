@@ -34,8 +34,21 @@ export async function obtenerPlanPorId(req, res, next) {
   }
 }
 
+function validarIngresosIncluidos(valor) {
+  if (valor === undefined || valor === null || String(valor).trim() === '') {
+    return { valido: true, valor: null };
+  }
+
+  const numero = Number(valor);
+  if (isNaN(numero) || !Number.isInteger(numero) || numero <= 0) {
+    return { valido: false };
+  }
+
+  return { valido: true, valor: numero };
+}
+
 export async function crearNuevoPlan(req, res, next) {
-  const { nombre_plan, descripcion, duracion_dias, precio, activo } = req.body;
+  const { nombre_plan, descripcion, duracion_dias, precio, ingresos_incluidos, activo } = req.body;
 
   const dias = Number(duracion_dias);
   const valorPrecio = Number(precio);
@@ -58,12 +71,23 @@ export async function crearNuevoPlan(req, res, next) {
     );
   }
 
+  const vIngresosIncluidos = validarIngresosIncluidos(ingresos_incluidos);
+  if (!vIngresosIncluidos.valido) {
+    return errorResponse(
+      res,
+      400,
+      'Los ingresos incluidos deben ser un número entero mayor a 0, o vacío para ilimitado',
+      'VALIDATION_ERROR'
+    );
+  }
+
   try {
     const planCreado = await crearPlan({
       nombre_plan: nombre_plan.trim(),
       descripcion: descripcion ? String(descripcion).trim() : null,
       duracion_dias: dias,
       precio: valorPrecio,
+      ingresos_incluidos: vIngresosIncluidos.valor,
       activo: activo !== undefined ? Boolean(activo) : 1
     });
 
@@ -82,7 +106,7 @@ export async function modificarPlan(req, res, next) {
     return errorResponse(res, 400, 'El ID del plan no es válido', 'INVALID_ID');
   }
 
-  const { nombre_plan, descripcion, duracion_dias, precio, activo } = req.body;
+  const { nombre_plan, descripcion, duracion_dias, precio, ingresos_incluidos, activo } = req.body;
 
   const campos = {};
   if (nombre_plan !== undefined) {
@@ -120,6 +144,19 @@ export async function modificarPlan(req, res, next) {
       );
     }
     campos.precio = valorPrecio;
+  }
+
+  if (ingresos_incluidos !== undefined) {
+    const vIngresosIncluidos = validarIngresosIncluidos(ingresos_incluidos);
+    if (!vIngresosIncluidos.valido) {
+      return errorResponse(
+        res,
+        400,
+        'Los ingresos incluidos deben ser un número entero mayor a 0, o vacío para ilimitado',
+        'VALIDATION_ERROR'
+      );
+    }
+    campos.ingresos_incluidos = vIngresosIncluidos.valor;
   }
 
   if (activo !== undefined) {

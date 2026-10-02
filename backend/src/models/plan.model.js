@@ -2,7 +2,7 @@ import { pool } from '../config/database.js';
 
 export async function listarPlanes({ soloActivos = true } = {}) {
   let sql = `
-    SELECT id_plan, nombre_plan, descripcion, duracion_dias, precio, activo, creado_en, actualizado_en
+    SELECT id_plan, nombre_plan, descripcion, duracion_dias, precio, ingresos_incluidos, activo, creado_en, actualizado_en
     FROM plan
   `;
 
@@ -19,7 +19,7 @@ export async function listarPlanes({ soloActivos = true } = {}) {
 
 export async function buscarPlanPorId(idPlan) {
   const [filas] = await pool.execute(
-    `SELECT id_plan, nombre_plan, descripcion, duracion_dias, precio, activo, creado_en, actualizado_en
+    `SELECT id_plan, nombre_plan, descripcion, duracion_dias, precio, ingresos_incluidos, activo, creado_en, actualizado_en
      FROM plan
      WHERE id_plan = ?
      LIMIT 1`,
@@ -31,7 +31,7 @@ export async function buscarPlanPorId(idPlan) {
 
 export async function buscarPlanPorNombre(nombrePlan) {
   const [filas] = await pool.execute(
-    `SELECT id_plan, nombre_plan, descripcion, duracion_dias, precio, activo, creado_en, actualizado_en
+    `SELECT id_plan, nombre_plan, descripcion, duracion_dias, precio, ingresos_incluidos, activo, creado_en, actualizado_en
      FROM plan
      WHERE nombre_plan = ?
      LIMIT 1`,
@@ -41,11 +41,18 @@ export async function buscarPlanPorNombre(nombrePlan) {
   return filas[0] || null;
 }
 
-export async function crearPlan({ nombre_plan, descripcion = null, duracion_dias, precio, activo = 1 }) {
+export async function crearPlan({
+  nombre_plan,
+  descripcion = null,
+  duracion_dias,
+  precio,
+  ingresos_incluidos = null,
+  activo = 1
+}) {
   const [resultado] = await pool.execute(
-    `INSERT INTO plan (nombre_plan, descripcion, duracion_dias, precio, activo)
-     VALUES (?, ?, ?, ?, ?)`,
-    [nombre_plan, descripcion, duracion_dias, precio, activo ? 1 : 0]
+    `INSERT INTO plan (nombre_plan, descripcion, duracion_dias, precio, ingresos_incluidos, activo)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [nombre_plan, descripcion, duracion_dias, precio, ingresos_incluidos, activo ? 1 : 0]
   );
 
   return buscarPlanPorId(resultado.insertId);
@@ -61,6 +68,8 @@ export async function actualizarPlan(idPlan, campos) {
   const descripcion = campos.descripcion !== undefined ? campos.descripcion : planActual.descripcion;
   const duracionDias = campos.duracion_dias ?? planActual.duracion_dias;
   const precio = campos.precio ?? planActual.precio;
+  const ingresosIncluidos =
+    campos.ingresos_incluidos !== undefined ? campos.ingresos_incluidos : planActual.ingresos_incluidos;
   const activo = campos.activo !== undefined ? (campos.activo ? 1 : 0) : planActual.activo;
 
   await pool.execute(
@@ -69,9 +78,10 @@ export async function actualizarPlan(idPlan, campos) {
          descripcion = ?,
          duracion_dias = ?,
          precio = ?,
+         ingresos_incluidos = ?,
          activo = ?
      WHERE id_plan = ?`,
-    [nombrePlan, descripcion, duracionDias, precio, activo, idPlan]
+    [nombrePlan, descripcion, duracionDias, precio, ingresosIncluidos, activo, idPlan]
   );
 
   return buscarPlanPorId(idPlan);

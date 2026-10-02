@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
 import { obtenerReservasDeProgramacion, parsearErrorBackend } from '../../services/clase.service.js';
+import { obtenerFechaHoyLocal } from '../../utils/fecha.js';
 import { ModalConfirmacion } from '../membresia/ModalConfirmacion.jsx';
 
-export function ModalVerAsistentes({ abierto, alCerrar, programacion, alCancelarReserva }) {
+export function ModalVerAsistentes({
+  abierto,
+  alCerrar,
+  programacion,
+  rolUsuario,
+  alCancelarReserva,
+  alMarcarAsistio
+}) {
   const [reservas, setReservas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [reservaACancelar, setReservaACancelar] = useState(null);
   const [cancelando, setCancelando] = useState(false);
+  const [marcandoAsistioId, setMarcandoAsistioId] = useState(null);
 
   useEffect(() => {
     if (abierto && programacion?.id_programacion) {
@@ -42,7 +51,22 @@ export function ModalVerAsistentes({ abierto, alCerrar, programacion, alCancelar
     }
   }
 
+  async function handleMarcarAsistio(idReserva) {
+    setError('');
+    setMarcandoAsistioId(idReserva);
+    try {
+      await alMarcarAsistio(idReserva);
+      await cargarAsistentes();
+    } catch (err) {
+      setError(parsearErrorBackend(err));
+    } finally {
+      setMarcandoAsistioId(null);
+    }
+  }
+
   if (!abierto || !programacion) return null;
+
+  const hoy = obtenerFechaHoyLocal();
 
   return (
     <>
@@ -114,15 +138,27 @@ export function ModalVerAsistentes({ abierto, alCerrar, programacion, alCancelar
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-center">
-                        {r.estado_reserva === 'Confirmada' && (
-                          <button
-                            type="button"
-                            onClick={() => setReservaACancelar(r)}
-                            className="rounded bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition border border-red-200"
-                          >
-                            Cancelar
-                          </button>
-                        )}
+                        <div className="flex items-center justify-center gap-2">
+                          {r.estado_reserva === 'Confirmada' && r.fecha_clase <= hoy && (
+                            <button
+                              type="button"
+                              onClick={() => handleMarcarAsistio(r.id_reserva)}
+                              disabled={marcandoAsistioId === r.id_reserva}
+                              className="rounded bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-100 transition border border-sky-200 disabled:opacity-50"
+                            >
+                              {marcandoAsistioId === r.id_reserva ? 'Marcando...' : 'Marcar asistió'}
+                            </button>
+                          )}
+                          {rolUsuario === 'Administrador' && r.estado_reserva === 'Confirmada' && (
+                            <button
+                              type="button"
+                              onClick={() => setReservaACancelar(r)}
+                              className="rounded bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition border border-red-200"
+                            >
+                              Cancelar
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

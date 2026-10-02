@@ -6,6 +6,7 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
     descripcion: '',
     duracion_dias: 30,
     precio: 0,
+    ingresos_incluidos: '',
     activo: true
   });
   const [error, setError] = useState('');
@@ -18,6 +19,7 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
         descripcion: plan.descripcion || '',
         duracion_dias: plan.duracion_dias || 30,
         precio: plan.precio || 0,
+        ingresos_incluidos: plan.ingresos_incluidos ?? '',
         activo: Boolean(plan.activo)
       });
     } else {
@@ -26,6 +28,7 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
         descripcion: '',
         duracion_dias: 30,
         precio: 0,
+        ingresos_incluidos: '',
         activo: true
       });
     }
@@ -48,6 +51,8 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
 
     const dias = Number(formulario.duracion_dias);
     const precio = Number(formulario.precio);
+    const ingresosTexto = String(formulario.ingresos_incluidos).trim();
+    const ingresosIncluidos = ingresosTexto === '' ? null : Number(ingresosTexto);
 
     if (!formulario.nombre_plan.trim()) {
       setError('El nombre del plan es obligatorio.');
@@ -64,6 +69,11 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
       return;
     }
 
+    if (ingresosIncluidos !== null && (isNaN(ingresosIncluidos) || ingresosIncluidos <= 0)) {
+      setError('Los ingresos incluidos deben ser un número entero mayor a 0, o vacío para ilimitado.');
+      return;
+    }
+
     setEnviando(true);
     try {
       await alGuardar({
@@ -71,6 +81,7 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
         descripcion: formulario.descripcion.trim() || null,
         duracion_dias: dias,
         precio: precio,
+        ingresos_incluidos: ingresosIncluidos,
         activo: formulario.activo
       });
       alCerrar();
@@ -169,6 +180,22 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Ingresos incluidos (vacío = ilimitado)
+            </label>
+            <input
+              type="number"
+              name="ingresos_incluidos"
+              min="1"
+              step="1"
+              value={formulario.ingresos_incluidos}
+              onChange={manejarCambio}
+              placeholder="Ej: 10 (tiquetera de 10 ingresos)"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
+            />
           </div>
 
           {plan && (

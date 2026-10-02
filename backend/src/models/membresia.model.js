@@ -49,10 +49,11 @@ export async function buscarMembresiaPorId(idMembresia) {
        m.fecha_inicio,
        m.fecha_vencimiento,
        m.precio_pagado,
+       m.ingresos_incluidos,
        m.estado_membresia,
        m.creado_en,
        m.actualizado_en,
-       CASE 
+       CASE
          WHEN m.estado_membresia = 'Cancelada' THEN 'Cancelada'
          WHEN CURDATE() < m.fecha_inicio THEN 'Pendiente'
          WHEN CURDATE() BETWEEN m.fecha_inicio AND m.fecha_vencimiento THEN 'Activa'
@@ -95,7 +96,7 @@ export async function registrarMembresia({ fk_cliente, fk_plan, fecha_inicio }) 
 
   // 2. Validar existencia y vigencia del plan
   const [planes] = await pool.execute(
-    `SELECT id_plan, nombre_plan, duracion_dias, precio, activo
+    `SELECT id_plan, nombre_plan, duracion_dias, precio, ingresos_incluidos, activo
      FROM plan
      WHERE id_plan = ?
      LIMIT 1`,
@@ -120,21 +121,21 @@ export async function registrarMembresia({ fk_cliente, fk_plan, fecha_inicio }) 
     ? String(fecha_inicio).trim()
     : null;
 
-  // 4. Insertar membresía calculando fecha_vencimiento y congelando precio_pagado
+  // 4. Insertar membresía calculando fecha_vencimiento y congelando precio_pagado e ingresos_incluidos
   let resultado;
   if (fechaInicioValida) {
     [resultado] = await pool.execute(
-      `INSERT INTO membresia 
-        (fk_cliente, fk_plan, fecha_inicio, fecha_vencimiento, precio_pagado, estado_membresia)
-       VALUES (?, ?, ?, DATE_ADD(?, INTERVAL ? DAY), ?, 'Activa')`,
-      [fk_cliente, fk_plan, fechaInicioValida, fechaInicioValida, plan.duracion_dias, plan.precio]
+      `INSERT INTO membresia
+        (fk_cliente, fk_plan, fecha_inicio, fecha_vencimiento, precio_pagado, ingresos_incluidos, estado_membresia)
+       VALUES (?, ?, ?, DATE_ADD(?, INTERVAL ? DAY), ?, ?, 'Activa')`,
+      [fk_cliente, fk_plan, fechaInicioValida, fechaInicioValida, plan.duracion_dias, plan.precio, plan.ingresos_incluidos]
     );
   } else {
     [resultado] = await pool.execute(
-      `INSERT INTO membresia 
-        (fk_cliente, fk_plan, fecha_inicio, fecha_vencimiento, precio_pagado, estado_membresia)
-       VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL ? DAY), ?, 'Activa')`,
-      [fk_cliente, fk_plan, plan.duracion_dias, plan.precio]
+      `INSERT INTO membresia
+        (fk_cliente, fk_plan, fecha_inicio, fecha_vencimiento, precio_pagado, ingresos_incluidos, estado_membresia)
+       VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL ? DAY), ?, ?, 'Activa')`,
+      [fk_cliente, fk_plan, plan.duracion_dias, plan.precio, plan.ingresos_incluidos]
     );
   }
 
@@ -161,10 +162,11 @@ export async function listarMembresiasPorCliente(idCliente) {
        m.fecha_inicio,
        m.fecha_vencimiento,
        m.precio_pagado,
+       m.ingresos_incluidos,
        m.estado_membresia,
        m.creado_en,
        m.actualizado_en,
-       CASE 
+       CASE
          WHEN m.estado_membresia = 'Cancelada' THEN 'Cancelada'
          WHEN CURDATE() < m.fecha_inicio THEN 'Pendiente'
          WHEN CURDATE() BETWEEN m.fecha_inicio AND m.fecha_vencimiento THEN 'Activa'
@@ -227,9 +229,10 @@ export async function listarTodasMembresias({ limit = 100, offset = 0 } = {}) {
        m.fecha_inicio,
        m.fecha_vencimiento,
        m.precio_pagado,
+       m.ingresos_incluidos,
        m.estado_membresia,
        m.creado_en,
-       CASE 
+       CASE
          WHEN m.estado_membresia = 'Cancelada' THEN 'Cancelada'
          WHEN CURDATE() < m.fecha_inicio THEN 'Pendiente'
          WHEN CURDATE() BETWEEN m.fecha_inicio AND m.fecha_vencimiento THEN 'Activa'
@@ -280,7 +283,7 @@ export async function editarMembresia(idMembresia, { fk_plan, fecha_inicio }) {
 
   // 3. Validar existencia y estado del plan final
   const [planes] = await pool.execute(
-    `SELECT id_plan, nombre_plan, duracion_dias, precio, activo
+    `SELECT id_plan, nombre_plan, duracion_dias, precio, ingresos_incluidos, activo
      FROM plan
      WHERE id_plan = ?
      LIMIT 1`,
@@ -305,15 +308,16 @@ export async function editarMembresia(idMembresia, { fk_plan, fecha_inicio }) {
     ? String(fecha_inicio).trim()
     : membresiaActual.fecha_inicio; // valor ya guardado en BD (formato YYYY-MM-DD)
 
-  // 5. Actualizar: recalcula fecha_vencimiento y precio_pagado
+  // 5. Actualizar: recalcula fecha_vencimiento, precio_pagado e ingresos_incluidos
   await pool.execute(
     `UPDATE membresia
-     SET fk_plan          = ?,
-         fecha_inicio     = ?,
-         fecha_vencimiento = DATE_ADD(?, INTERVAL ? DAY),
-         precio_pagado    = ?
-     WHERE id_membresia   = ?`,
-    [idPlanFinal, fechaInicioFinal, fechaInicioFinal, plan.duracion_dias, plan.precio, idMembresia]
+     SET fk_plan             = ?,
+         fecha_inicio        = ?,
+         fecha_vencimiento   = DATE_ADD(?, INTERVAL ? DAY),
+         precio_pagado       = ?,
+         ingresos_incluidos  = ?
+     WHERE id_membresia      = ?`,
+    [idPlanFinal, fechaInicioFinal, fechaInicioFinal, plan.duracion_dias, plan.precio, plan.ingresos_incluidos, idMembresia]
   );
 
   return buscarMembresiaPorId(idMembresia);

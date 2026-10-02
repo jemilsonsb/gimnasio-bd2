@@ -84,3 +84,10 @@ export function cancelarReserva(idReserva) {
     headers: headersAutenticados()
   });
 }
+
+export function marcarAsistio(idReserva) {
+  return apiRequest(`/reservas/${idReserva}/asistio`, {
+    method: 'PATCH',
+    headers: headersAutenticados()
+  });
+}

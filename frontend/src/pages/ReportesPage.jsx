@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ReporteAsistencias } from '../components/reporte/ReporteAsistencias.jsx';
 import { ReporteIngresos } from '../components/reporte/ReporteIngresos.jsx';
 import { ReporteMembresias } from '../components/reporte/ReporteMembresias.jsx';
 import { ReporteClases } from '../components/reporte/ReporteClases.jsx';
@@ -21,7 +22,8 @@ export function ReportesPage() {
     esAdministrador && { id: 'ingresos', titulo: 'Ingresos', render: () => <ReporteIngresos modo="general" /> },
     esAdministrador && { id: 'membresias', titulo: 'Membresías', render: () => <ReporteMembresias modo="general" /> },
     { id: 'clases', titulo: 'Clases', render: () => <ReporteClases modo="general" /> },
-    esAdministrador && { id: 'clientes', titulo: 'Clientes', render: () => <ReporteClientes /> }
+    esAdministrador && { id: 'clientes', titulo: 'Clientes', render: () => <ReporteClientes /> },
+    esAdministrador && { id: 'asistencias', titulo: 'Asistencias', render: () => <ReporteAsistencias modo="general" /> }
   ].filter(Boolean);
 
   const especificos = [
@@ -44,6 +46,11 @@ export function ReportesPage() {
       id: 'rutinas-entrenador-cliente',
       titulo: 'Rutinas por entrenador o cliente',
       render: () => <ReporteRutinas modo="especifico" />
+    },
+    esAdministrador && {
+      id: 'asistencias-cliente-plan',
+      titulo: 'Asistencias de un cliente o plan',
+      render: () => <ReporteAsistencias modo="especifico" />
     }
   ].filter(Boolean);
 
