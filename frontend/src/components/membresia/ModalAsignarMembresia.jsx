@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { obtenerFechaHoyLocal, formatearFechaLocal } from '../../utils/fecha.js';
 
 export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes = [], planes = [] }) {
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = obtenerFechaHoyLocal();
 
   const [fkCliente, setFkCliente] = useState('');
   const [fkPlan, setFkPlan] = useState('');
@@ -14,7 +15,7 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
     if (abierto) {
       setFkCliente('');
       setFkPlan('');
-      setFechaInicio(new Date().toISOString().slice(0, 10));
+      setFechaInicio(obtenerFechaHoyLocal());
       setError('');
       setConfirmacionExito(null);
     }
@@ -28,7 +29,7 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
     if (!fechaInicio || !planSeleccionado?.duracion_dias) return null;
     const fecha = new Date(`${fechaInicio}T00:00:00`);
     fecha.setDate(fecha.getDate() + Number(planSeleccionado.duracion_dias));
-    return fecha.toISOString().slice(0, 10);
+    return formatearFechaLocal(fecha);
   }
 
   const vencimientoEstimado = calcularVencimientoEstimado();

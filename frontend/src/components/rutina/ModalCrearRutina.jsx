@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { crearRutina } from '../../services/rutina.service.js';
+import { obtenerFechaHoyLocal } from '../../utils/fecha.js';
 
 export function ModalCrearRutina({ abierto, alCerrar, alGuardar, clientes = [], entrenadores = [] }) {
   const [fkCliente, setFkCliente] = useState('');
   const [fkEntrenador, setFkEntrenador] = useState('');
   const [nombreRutina, setNombreRutina] = useState('');
   const [objetivo, setObjetivo] = useState('');
-  const [fechaInicio, setFechaInicio] = useState(new Date().toISOString().split('T')[0]);
+  const [fechaInicio, setFechaInicio] = useState(obtenerFechaHoyLocal());
   const [fechaFin, setFechaFin] = useState('');
   const [estado, setEstado] = useState('Activa');
   const [guardando, setGuardando] = useState(false);
@@ -22,7 +23,7 @@ export function ModalCrearRutina({ abierto, alCerrar, alGuardar, clientes = [], 
       setFkEntrenador(entrenadores[0]?.id_entrenador ? String(entrenadores[0].id_entrenador) : '');
       setNombreRutina('');
       setObjetivo('');
-      setFechaInicio(new Date().toISOString().split('T')[0]);
+      setFechaInicio(obtenerFechaHoyLocal());
       setFechaFin('');
       setEstado('Activa');
       setError('');

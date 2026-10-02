@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { editarMembresia } from '../../services/membresia.service.js';
+import { formatearFechaLocal } from '../../utils/fecha.js';
 
 export function ModalEditarMembresia({ abierto, alCerrar, alGuardar, membresia, planes = [] }) {
   const [fkPlan, setFkPlan] = useState('');
@@ -26,7 +27,7 @@ export function ModalEditarMembresia({ abierto, alCerrar, alGuardar, membresia, 
     if (!fechaInicio || !planSeleccionado?.duracion_dias) return null;
     const fecha = new Date(`${fechaInicio}T00:00:00`);
     fecha.setDate(fecha.getDate() + Number(planSeleccionado.duracion_dias));
-    return fecha.toISOString().slice(0, 10);
+    return formatearFechaLocal(fecha);
   }
 
   const vencimientoEstimado = calcularVencimientoEstimado();

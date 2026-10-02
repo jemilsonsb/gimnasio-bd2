@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { crearProgramacion, parsearErrorBackend } from '../../services/clase.service.js';
+import { obtenerFechaHoyLocal } from '../../utils/fecha.js';
 
 export function ModalProgramarClase({
   abierto,
@@ -9,7 +10,7 @@ export function ModalProgramarClase({
   entrenadores = [],
   rolUsuario = ''
 }) {
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = obtenerFechaHoyLocal();
 
   const [fkClase, setFkClase] = useState('');
   const [fecha, setFecha] = useState(hoy);
@@ -23,7 +24,7 @@ export function ModalProgramarClase({
   useEffect(() => {
     if (abierto) {
       setFkClase('');
-      setFecha(new Date().toISOString().slice(0, 10));
+      setFecha(obtenerFechaHoyLocal());
       setHoraInicio('08:00');
       setHoraFin('09:00');
       setCuposDisponibles(15);
