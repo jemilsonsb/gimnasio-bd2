@@ -50,6 +50,9 @@ export async function crearMembresia(req, res, next) {
     if (error.code === 'INACTIVE_USER') {
       return errorResponse(res, 400, error.message, error.code);
     }
+    if (error.code === 'INVALID_ROLE') {
+      return errorResponse(res, 400, error.message, error.code);
+    }
     if (error.code === 'PLAN_NOT_FOUND') {
       return errorResponse(res, 404, error.message, error.code);
     }

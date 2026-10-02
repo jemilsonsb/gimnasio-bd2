@@ -4,10 +4,11 @@ export async function buscarClientePorId(idCliente) {
   const [filas] = await pool.execute(
     `SELECT c.id_cliente, c.codigo_miembro, c.fk_usuario,
             u.id_usuario, u.nombre, u.apellido, u.correo, u.documento_identidad,
-            e.nombre_estado AS estado
+            e.nombre_estado AS estado, r.nombre_rol
      FROM cliente c
      INNER JOIN usuario u ON u.id_usuario = c.fk_usuario
      INNER JOIN estado e ON e.id_estado = u.fk_estado
+     INNER JOIN rol r ON r.id_rol = u.fk_rol
      WHERE c.id_cliente = ?
      LIMIT 1`,
     [idCliente]
@@ -83,6 +84,12 @@ export async function registrarMembresia({ fk_cliente, fk_plan, fecha_inicio }) 
   if (cliente.estado !== 'Activo') {
     const error = new Error('El cliente está inactivo y no se le puede asignar una membresía');
     error.code = 'INACTIVE_USER';
+    throw error;
+  }
+
+  if (cliente.nombre_rol !== 'Cliente') {
+    const error = new Error('El usuario asociado no tiene rol Cliente y no puede tener una membresía');
+    error.code = 'INVALID_ROLE';
     throw error;
   }
 

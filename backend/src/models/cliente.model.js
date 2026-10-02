@@ -17,11 +17,13 @@ export async function listarClientes({ soloActivos = true } = {}) {
     FROM cliente c
     INNER JOIN usuario u ON u.id_usuario = c.fk_usuario
     INNER JOIN estado e ON e.id_estado = u.fk_estado
+    INNER JOIN rol r ON r.id_rol = u.fk_rol
+    WHERE r.nombre_rol = 'Cliente'
   `;
 
   const params = [];
   if (soloActivos) {
-    sql += " WHERE e.nombre_estado = 'Activo'";
+    sql += " AND e.nombre_estado = 'Activo'";
   }
 
   sql += ' ORDER BY u.nombre ASC, u.apellido ASC';

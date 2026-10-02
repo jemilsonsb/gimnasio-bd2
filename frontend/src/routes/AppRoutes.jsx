@@ -10,6 +10,7 @@ import { MiRutinaPage } from '../pages/MiRutinaPage.jsx';
 import { MisReservasPage } from '../pages/MisReservasPage.jsx';
 import { PlanesAdminPage } from '../pages/PlanesAdminPage.jsx';
 import { RegisterPage } from '../pages/RegisterPage.jsx';
+import { ReportesPage } from '../pages/ReportesPage.jsx';
 import { ReservarClasePage } from '../pages/ReservarClasePage.jsx';
 import { RutinasAdminPage } from '../pages/RutinasAdminPage.jsx';
 import { UsersPage } from '../pages/UsersPage.jsx';
@@ -91,6 +92,14 @@ export function AppRoutes() {
             element={
               <ProtectedRoute rolesPermitidos={['Administrador', 'Entrenador']}>
                 <ClasesAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reportes"
+            element={
+              <ProtectedRoute rolesPermitidos={['Administrador', 'Entrenador']}>
+                <ReportesPage />
               </ProtectedRoute>
             }
           />

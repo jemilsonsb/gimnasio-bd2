@@ -67,6 +67,9 @@ export function Navbar() {
                 <Link to="/admin/clases" className={claseEnlace('/admin/clases')}>
                   Clases
                 </Link>
+                <Link to="/admin/reportes" className={claseEnlace('/admin/reportes')}>
+                  Reportes
+                </Link>
               </>
             )}
 

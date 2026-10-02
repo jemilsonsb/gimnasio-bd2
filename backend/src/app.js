@@ -13,6 +13,7 @@ import claseRoutes from './routes/clase.routes.js';
 import programacionClaseRoutes from './routes/programacion_clase.routes.js';
 import reservaClaseRoutes from './routes/reserva_clase.routes.js';
 import entrenadorRoutes from './routes/entrenador.routes.js';
+import reporteRoutes from './routes/reporte.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { successResponse } from './utils/api-response.js';
 
@@ -38,6 +39,7 @@ app.use('/api/ficha-tecnica', fichaTecnicaRoutes);
 app.use('/api/clases', claseRoutes);
 app.use('/api/programaciones', programacionClaseRoutes);
 app.use('/api/reservas', reservaClaseRoutes);
+app.use('/api/reportes', reporteRoutes);
 
 app.use((_req, res) => {
   return res.status(404).json({
