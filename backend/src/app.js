@@ -12,6 +12,7 @@ import fichaTecnicaRoutes from './routes/ficha_tecnica.routes.js';
 import claseRoutes from './routes/clase.routes.js';
 import programacionClaseRoutes from './routes/programacion_clase.routes.js';
 import reservaClaseRoutes from './routes/reserva_clase.routes.js';
+import entrenadorRoutes from './routes/entrenador.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { successResponse } from './utils/api-response.js';
 
@@ -29,6 +30,7 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/planes', planRoutes);
 app.use('/api/membresias', membresiaRoutes);
 app.use('/api/clientes', clienteRoutes);
+app.use('/api/entrenadores', entrenadorRoutes);
 app.use('/api/pagos', pagoRoutes);
 app.use('/api/ejercicios', ejercicioRoutes);
 app.use('/api/rutinas', rutinaRoutes);

@@ -38,7 +38,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-2">
+          <nav className="flex flex-wrap items-center gap-1 sm:gap-2">
             <Link to="/dashboard" className={claseEnlace('/dashboard')}>
               Dashboard
             </Link>
@@ -64,6 +64,9 @@ export function Navbar() {
                 <Link to="/admin/rutinas" className={claseEnlace('/admin/rutinas')}>
                   Rutinas
                 </Link>
+                <Link to="/admin/clases" className={claseEnlace('/admin/clases')}>
+                  Clases
+                </Link>
               </>
             )}
 
@@ -77,6 +80,12 @@ export function Navbar() {
                 </Link>
                 <Link to="/mi-ficha-tecnica" className={claseEnlace('/mi-ficha-tecnica')}>
                   Mi Ficha Técnica
+                </Link>
+                <Link to="/reservar-clase" className={claseEnlace('/reservar-clase')}>
+                  Reservar Clase
+                </Link>
+                <Link to="/mis-reservas" className={claseEnlace('/mis-reservas')}>
+                  Mis Reservas
                 </Link>
               </>
             )}

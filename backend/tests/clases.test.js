@@ -46,6 +46,24 @@ test('GET /api/clases acepta cualquier rol autenticado', async () => {
   assert.ok(Array.isArray(r.body.data));
 });
 
+// ─── MÓDULO ENTRENADORES ──────────────────────────────────────────
+
+test('GET /api/entrenadores rechaza consulta sin token', async () => {
+  const r = await request(app).get('/api/entrenadores');
+  assert.equal(r.status, 401);
+  assert.equal(r.body.success, false);
+  assert.equal(r.body.error.code, 'UNAUTHORIZED');
+});
+
+test('GET /api/entrenadores acepta rol Administrador o Entrenador', async () => {
+  const r = await request(app)
+    .get('/api/entrenadores')
+    .set('Authorization', `Bearer ${tokenAdmin}`);
+  assert.equal(r.status, 200);
+  assert.equal(r.body.success, true);
+  assert.ok(Array.isArray(r.body.data));
+});
+
 test('POST /api/clases rechaza creacion sin token', async () => {
   const r = await request(app)
     .post('/api/clases')

@@ -8,10 +8,9 @@ import { autorizarRoles } from '../middlewares/role.middleware.js';
 
 const clienteRoutes = Router();
 
-// Exclusivo para administradores
-clienteRoutes.use(autenticarUsuario, autorizarRoles('Administrador'));
+clienteRoutes.use(autenticarUsuario);
 
-clienteRoutes.get('/', obtenerClientes);
-clienteRoutes.get('/:id', obtenerClientePorId);
+clienteRoutes.get('/', autorizarRoles('Administrador', 'Entrenador'), obtenerClientes);
+clienteRoutes.get('/:id', autorizarRoles('Administrador', 'Entrenador'), obtenerClientePorId);
 
 export default clienteRoutes;

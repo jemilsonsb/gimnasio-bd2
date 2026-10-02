@@ -4,8 +4,8 @@ import { ModalDetallesRutina } from '../components/rutina/ModalDetallesRutina.js
 import { ModalFichaTecnica } from '../components/rutina/ModalFichaTecnica.jsx';
 import { obtenerClientes } from '../services/cliente.service.js';
 import { obtenerEjercicios } from '../services/ejercicio.service.js';
+import { obtenerEntrenadores } from '../services/entrenador.service.js';
 import { obtenerTodasRutinas } from '../services/rutina.service.js';
-import { obtenerUsuarios } from '../services/usuario.service.js';
 
 export function RutinasAdminPage() {
   const [rutinas, setRutinas] = useState([]);
@@ -31,26 +31,17 @@ export function RutinasAdminPage() {
     setCargando(true);
     setError('');
     try {
-      const [respRutinas, respClientes, respEjercicios, respUsuarios] = await Promise.all([
+      const [respRutinas, respClientes, respEjercicios, respEntrenadores] = await Promise.all([
         obtenerTodasRutinas(),
         obtenerClientes(),
         obtenerEjercicios(),
-        obtenerUsuarios().catch(() => ({ data: [] }))
+        obtenerEntrenadores().catch(() => ({ data: [] }))
       ]);
 
       setRutinas(respRutinas?.data || []);
       setClientes(respClientes?.data || []);
       setEjercicios(respEjercicios?.data || []);
-
-      // Filtrar entrenadores desde usuarios para el selector de admin
-      const listaEntrenadores = (respUsuarios?.data || [])
-        .filter((u) => u.nombre_rol === 'Entrenador' || u.nombre_rol === 'Administrador')
-        .map((u) => ({
-          id_entrenador: u.id_usuario, // o id correspondiente
-          nombre: u.nombre,
-          apellido: u.apellido
-        }));
-      setEntrenadores(listaEntrenadores);
+      setEntrenadores(respEntrenadores?.data || []);
     } catch (err) {
       setError(err?.message || 'Error al cargar los datos de rutinas.');
     } finally {

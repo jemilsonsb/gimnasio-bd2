@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes, Outlet } from 'react-router-dom';
+import { ClasesAdminPage } from '../pages/ClasesAdminPage.jsx';
 import { DashboardPage } from '../pages/DashboardPage.jsx';
 import { EjerciciosAdminPage } from '../pages/EjerciciosAdminPage.jsx';
 import { LoginPage } from '../pages/LoginPage.jsx';
@@ -6,8 +7,10 @@ import { MembresiasAdminPage } from '../pages/MembresiasAdminPage.jsx';
 import { MiFichaTecnicaPage } from '../pages/MiFichaTecnicaPage.jsx';
 import { MiMembresiaPage } from '../pages/MiMembresiaPage.jsx';
 import { MiRutinaPage } from '../pages/MiRutinaPage.jsx';
+import { MisReservasPage } from '../pages/MisReservasPage.jsx';
 import { PlanesAdminPage } from '../pages/PlanesAdminPage.jsx';
 import { RegisterPage } from '../pages/RegisterPage.jsx';
+import { ReservarClasePage } from '../pages/ReservarClasePage.jsx';
 import { RutinasAdminPage } from '../pages/RutinasAdminPage.jsx';
 import { UsersPage } from '../pages/UsersPage.jsx';
 import { ProtectedRoute } from './ProtectedRoute.jsx';
@@ -84,6 +87,14 @@ export function AppRoutes() {
             }
           />
           <Route
+            path="/admin/clases"
+            element={
+              <ProtectedRoute rolesPermitidos={['Administrador', 'Entrenador']}>
+                <ClasesAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/mi-membresia"
             element={
               <ProtectedRoute rolPermitido="Cliente">
@@ -104,6 +115,22 @@ export function AppRoutes() {
             element={
               <ProtectedRoute rolPermitido="Cliente">
                 <MiFichaTecnicaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservar-clase"
+            element={
+              <ProtectedRoute rolPermitido="Cliente">
+                <ReservarClasePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mis-reservas"
+            element={
+              <ProtectedRoute rolPermitido="Cliente">
+                <MisReservasPage />
               </ProtectedRoute>
             }
           />
