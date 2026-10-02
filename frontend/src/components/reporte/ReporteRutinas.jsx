@@ -3,6 +3,7 @@ import { obtenerReporteRutinas } from '../../services/reporte.service.js';
 import { obtenerEntrenadores } from '../../services/entrenador.service.js';
 import { obtenerClientes } from '../../services/cliente.service.js';
 import { TablaReporte } from './TablaReporte.jsx';
+import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
 
 const COLUMNAS = [
   { key: 'nombre_rutina', header: 'Rutina' },
@@ -68,21 +69,29 @@ export function ReporteRutinas({ modo = 'general' }) {
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
           Entrenador
-          <select name="fk_entrenador" value={filtros.fk_entrenador} onChange={manejarCambio} className="rounded border border-slate-300 px-2 py-1.5 text-sm">
-            <option value="">Todos</option>
-            {entrenadores.map((e) => (
-              <option key={e.id_entrenador} value={e.id_entrenador}>{e.nombre} {e.apellido}</option>
-            ))}
-          </select>
+          <SelectorBusqueda
+            value={filtros.fk_entrenador}
+            onChange={(valor) => manejarCambio({ target: { name: 'fk_entrenador', value: valor } })}
+            placeholder="Todos"
+            opciones={entrenadores.map((e) => ({
+              value: String(e.id_entrenador),
+              label: `${e.nombre} ${e.apellido}`,
+              textoBusqueda: `${e.nombre} ${e.apellido} ${e.correo || ''}`
+            }))}
+          />
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
           Cliente
-          <select name="fk_cliente" value={filtros.fk_cliente} onChange={manejarCambio} className="rounded border border-slate-300 px-2 py-1.5 text-sm">
-            <option value="">Todos</option>
-            {clientes.map((c) => (
-              <option key={c.id_cliente} value={c.id_cliente}>{c.nombre} {c.apellido}</option>
-            ))}
-          </select>
+          <SelectorBusqueda
+            value={filtros.fk_cliente}
+            onChange={(valor) => manejarCambio({ target: { name: 'fk_cliente', value: valor } })}
+            placeholder="Todos"
+            opciones={clientes.map((c) => ({
+              value: String(c.id_cliente),
+              label: `${c.nombre} ${c.apellido}`,
+              textoBusqueda: `${c.nombre} ${c.apellido} ${c.codigo_miembro || ''} ${c.correo || ''}`
+            }))}
+          />
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
           Estado

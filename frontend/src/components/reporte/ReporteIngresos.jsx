@@ -3,6 +3,7 @@ import { obtenerReporteIngresos } from '../../services/reporte.service.js';
 import { obtenerClientes } from '../../services/cliente.service.js';
 import { obtenerPlanes } from '../../services/plan.service.js';
 import { TablaReporte } from './TablaReporte.jsx';
+import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
 
 const COLUMNAS = [
   { key: 'fecha_pago', header: 'Fecha' },
@@ -79,12 +80,16 @@ export function ReporteIngresos({ modo = 'general' }) {
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
           Cliente
-          <select name="fk_cliente" value={filtros.fk_cliente} onChange={manejarCambio} className="rounded border border-slate-300 px-2 py-1.5 text-sm">
-            <option value="">Todos</option>
-            {clientes.map((c) => (
-              <option key={c.id_cliente} value={c.id_cliente}>{c.nombre} {c.apellido}</option>
-            ))}
-          </select>
+          <SelectorBusqueda
+            value={filtros.fk_cliente}
+            onChange={(valor) => manejarCambio({ target: { name: 'fk_cliente', value: valor } })}
+            placeholder="Todos"
+            opciones={clientes.map((c) => ({
+              value: String(c.id_cliente),
+              label: `${c.nombre} ${c.apellido}`,
+              textoBusqueda: `${c.nombre} ${c.apellido} ${c.codigo_miembro || ''} ${c.correo || ''}`
+            }))}
+          />
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
           Plan

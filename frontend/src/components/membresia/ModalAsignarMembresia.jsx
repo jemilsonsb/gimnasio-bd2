@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { obtenerFechaHoyLocal, formatearFechaLocal } from '../../utils/fecha.js';
+import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
 
 export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes = [], planes = [] }) {
   const hoy = obtenerFechaHoyLocal();
@@ -75,7 +76,7 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-150">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-150">
         <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
           <h2 className="text-xl font-bold text-slate-800">Asignar Membresía</h2>
           <button
@@ -128,21 +129,18 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Cliente *
               </label>
-              <select
+              <SelectorBusqueda
                 value={fkCliente}
-                onChange={(e) => setFkCliente(e.target.value)}
-                required
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
-              >
-                <option value="">-- Selecciona un cliente --</option>
-                {clientes
+                onChange={setFkCliente}
+                placeholder="Busca por nombre, código o correo..."
+                opciones={clientes
                   .filter((c) => c.estado === 'Activo')
-                  .map((c) => (
-                    <option key={c.id_cliente} value={c.id_cliente}>
-                      {c.nombre} {c.apellido} ({c.codigo_miembro || 'S/C'}) - {c.correo}
-                    </option>
-                  ))}
-              </select>
+                  .map((c) => ({
+                    value: String(c.id_cliente),
+                    label: `${c.nombre} ${c.apellido} (${c.codigo_miembro || 'S/C'}) - ${c.correo}`,
+                    textoBusqueda: `${c.nombre} ${c.apellido} ${c.codigo_miembro || ''} ${c.correo}`
+                  }))}
+              />
             </div>
 
             <div>

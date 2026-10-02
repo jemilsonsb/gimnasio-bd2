@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { crearRutina } from '../../services/rutina.service.js';
 import { obtenerFechaHoyLocal } from '../../utils/fecha.js';
+import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
 
 export function ModalCrearRutina({ abierto, alCerrar, alGuardar, clientes = [], entrenadores = [] }) {
   const [fkCliente, setFkCliente] = useState('');
@@ -106,19 +107,16 @@ export function ModalCrearRutina({ abierto, alCerrar, alGuardar, clientes = [], 
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Cliente <span className="text-red-500">*</span>
             </label>
-            <select
-              required
+            <SelectorBusqueda
               value={fkCliente}
-              onChange={(e) => setFkCliente(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition bg-white"
-            >
-              <option value="">-- Seleccionar cliente --</option>
-              {clientes.map((c) => (
-                <option key={c.id_cliente} value={c.id_cliente}>
-                  {c.nombre} {c.apellido} ({c.codigo_miembro || `ID: ${c.id_cliente}`})
-                </option>
-              ))}
-            </select>
+              onChange={setFkCliente}
+              placeholder="Busca por nombre, código o correo..."
+              opciones={clientes.map((c) => ({
+                value: String(c.id_cliente),
+                label: `${c.nombre} ${c.apellido} (${c.codigo_miembro || `ID: ${c.id_cliente}`})`,
+                textoBusqueda: `${c.nombre} ${c.apellido} ${c.codigo_miembro || ''} ${c.correo || ''}`
+              }))}
+            />
           </div>
 
           {esAdmin && (
@@ -126,19 +124,16 @@ export function ModalCrearRutina({ abierto, alCerrar, alGuardar, clientes = [], 
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Entrenador Asignado <span className="text-red-500">*</span>
               </label>
-              <select
-                required
+              <SelectorBusqueda
                 value={fkEntrenador}
-                onChange={(e) => setFkEntrenador(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition bg-white"
-              >
-                <option value="">-- Seleccionar entrenador --</option>
-                {entrenadores.map((e) => (
-                  <option key={e.id_entrenador} value={e.id_entrenador}>
-                    {e.nombre} {e.apellido}
-                  </option>
-                ))}
-              </select>
+                onChange={setFkEntrenador}
+                placeholder="Busca por nombre o correo..."
+                opciones={entrenadores.map((e) => ({
+                  value: String(e.id_entrenador),
+                  label: `${e.nombre} ${e.apellido}`,
+                  textoBusqueda: `${e.nombre} ${e.apellido} ${e.correo || ''}`
+                }))}
+              />
             </div>
           )}
 

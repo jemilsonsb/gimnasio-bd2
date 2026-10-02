@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { registrarAsistencia } from '../services/asistencia.service.js';
 import { obtenerClientes } from '../services/cliente.service.js';
+import { SelectorBusqueda } from '../components/common/SelectorBusqueda.jsx';
 
 const MENSAJES_ERROR = {
   CLIENT_NOT_FOUND: 'Cliente no encontrado.',
@@ -71,26 +72,21 @@ export function AsistenciasAdminPage() {
         <form onSubmit={manejarRegistro} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
-            <select
+            <SelectorBusqueda
               value={fkCliente}
-              onChange={(e) => {
-                setFkCliente(e.target.value);
+              onChange={(valor) => {
+                setFkCliente(valor);
                 setResultado(null);
                 setError('');
               }}
               disabled={cargandoClientes}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
-            >
-              <option value="">
-                {cargandoClientes ? 'Cargando clientes...' : 'Selecciona un cliente'}
-              </option>
-              {clientes.map((c) => (
-                <option key={c.id_cliente} value={c.id_cliente}>
-                  {c.nombre} {c.apellido}
-                  {c.codigo_miembro ? ` (${c.codigo_miembro})` : ''}
-                </option>
-              ))}
-            </select>
+              placeholder={cargandoClientes ? 'Cargando clientes...' : 'Busca por nombre, código o correo...'}
+              opciones={clientes.map((c) => ({
+                value: String(c.id_cliente),
+                label: `${c.nombre} ${c.apellido}${c.codigo_miembro ? ` (${c.codigo_miembro})` : ''}`,
+                textoBusqueda: `${c.nombre} ${c.apellido} ${c.codigo_miembro || ''} ${c.correo || ''}`
+              }))}
+            />
           </div>
 
           {error && (

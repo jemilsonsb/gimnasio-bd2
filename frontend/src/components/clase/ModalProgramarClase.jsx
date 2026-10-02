@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { crearProgramacion, parsearErrorBackend } from '../../services/clase.service.js';
 import { obtenerFechaHoyLocal } from '../../utils/fecha.js';
+import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
 
 export function ModalProgramarClase({
   abierto,
@@ -155,19 +156,16 @@ export function ModalProgramarClase({
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Entrenador Responsable *
               </label>
-              <select
+              <SelectorBusqueda
                 value={fkEntrenador}
-                onChange={(e) => setFkEntrenador(e.target.value)}
-                required
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
-              >
-                <option value="">-- Selecciona un entrenador --</option>
-                {entrenadores.map((e) => (
-                  <option key={e.id_entrenador} value={e.id_entrenador}>
-                    {e.nombre} {e.apellido} ({e.correo})
-                  </option>
-                ))}
-              </select>
+                onChange={setFkEntrenador}
+                placeholder="Busca por nombre o correo..."
+                opciones={entrenadores.map((e) => ({
+                  value: String(e.id_entrenador),
+                  label: `${e.nombre} ${e.apellido} (${e.correo})`,
+                  textoBusqueda: `${e.nombre} ${e.apellido} ${e.correo || ''}`
+                }))}
+              />
             </div>
           )}
 
