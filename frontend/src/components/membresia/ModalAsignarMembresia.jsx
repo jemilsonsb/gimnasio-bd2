@@ -7,6 +7,9 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
   const [fkCliente, setFkCliente] = useState('');
   const [fkPlan, setFkPlan] = useState('');
   const [fechaInicio, setFechaInicio] = useState(hoy);
+  const [registrarPagoAhora, setRegistrarPagoAhora] = useState(true);
+  const [metodoPago, setMetodoPago] = useState('Efectivo');
+  const [estadoPago, setEstadoPago] = useState('Pagado');
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [confirmacionExito, setConfirmacionExito] = useState(null);
@@ -16,6 +19,9 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
       setFkCliente('');
       setFkPlan('');
       setFechaInicio(obtenerFechaHoyLocal());
+      setRegistrarPagoAhora(true);
+      setMetodoPago('Efectivo');
+      setEstadoPago('Pagado');
       setError('');
       setConfirmacionExito(null);
     }
@@ -53,7 +59,10 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
       const respuesta = await alGuardar({
         fk_cliente: Number(fkCliente),
         fk_plan: Number(fkPlan),
-        fecha_inicio: fechaInicio || undefined
+        fecha_inicio: fechaInicio || undefined,
+        ...(registrarPagoAhora
+          ? { pago: { metodo_pago: metodoPago, estado_pago: estadoPago } }
+          : {})
       });
 
       setConfirmacionExito(respuesta?.data || { fecha_vencimiento: vencimientoEstimado });
@@ -199,6 +208,61 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
                 </div>
               </div>
             )}
+
+            <div className="rounded-lg border border-slate-200 p-4">
+              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={registrarPagoAhora}
+                  onChange={(e) => setRegistrarPagoAhora(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                />
+                Registrar pago ahora
+              </label>
+
+              {registrarPagoAhora && (
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Método de pago *
+                    </label>
+                    <select
+                      value={metodoPago}
+                      onChange={(e) => setMetodoPago(e.target.value)}
+                      required={registrarPagoAhora}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
+                    >
+                      <option value="Efectivo">Efectivo</option>
+                      <option value="Tarjeta">Tarjeta</option>
+                      <option value="Transferencia">Transferencia</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Estado del pago *
+                    </label>
+                    <select
+                      value={estadoPago}
+                      onChange={(e) => setEstadoPago(e.target.value)}
+                      required={registrarPagoAhora}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none"
+                    >
+                      <option value="Pagado">Pagado</option>
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="Rechazado">Rechazado</option>
+                    </select>
+                  </div>
+
+                  <div className="col-span-2 text-sm text-slate-600">
+                    Monto a cobrar:{' '}
+                    <span className="font-semibold text-slate-800">
+                      {planSeleccionado ? `$${planSeleccionado.precio}` : '—'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button

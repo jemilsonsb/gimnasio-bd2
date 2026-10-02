@@ -142,6 +142,109 @@ export async function registrarMembresia({ fk_cliente, fk_plan, fecha_inicio }) 
   return buscarMembresiaPorId(resultado.insertId);
 }
 
+export async function registrarMembresiaConPago({ fk_cliente, fk_plan, fecha_inicio, pago }) {
+  // 1. Validar existencia y estado del cliente
+  const cliente = await buscarClientePorId(fk_cliente);
+
+  if (!cliente) {
+    const error = new Error('El cliente especificado no existe');
+    error.code = 'CLIENT_NOT_FOUND';
+    throw error;
+  }
+
+  if (cliente.estado !== 'Activo') {
+    const error = new Error('El cliente está inactivo y no se le puede asignar una membresía');
+    error.code = 'INACTIVE_USER';
+    throw error;
+  }
+
+  if (cliente.nombre_rol !== 'Cliente') {
+    const error = new Error('El usuario asociado no tiene rol Cliente y no puede tener una membresía');
+    error.code = 'INVALID_ROLE';
+    throw error;
+  }
+
+  // 2. Validar existencia y vigencia del plan
+  const [planes] = await pool.execute(
+    `SELECT id_plan, nombre_plan, duracion_dias, precio, ingresos_incluidos, activo
+     FROM plan
+     WHERE id_plan = ?
+     LIMIT 1`,
+    [fk_plan]
+  );
+
+  if (planes.length === 0) {
+    const error = new Error('El plan especificado no existe');
+    error.code = 'PLAN_NOT_FOUND';
+    throw error;
+  }
+
+  const plan = planes[0];
+  if (!plan.activo) {
+    const error = new Error('El plan seleccionado se encuentra desactivado');
+    error.code = 'PLAN_INACTIVE';
+    throw error;
+  }
+
+  // 3. Determinar fecha de inicio (si no se envía, se usa la fecha actual)
+  const fechaInicioValida = fecha_inicio && String(fecha_inicio).trim() !== ''
+    ? String(fecha_inicio).trim()
+    : null;
+
+  // 4. Insertar membresía y, si corresponde, su pago inicial en una sola transacción
+  const conexion = await pool.getConnection();
+  try {
+    await conexion.beginTransaction();
+
+    let resultadoMembresia;
+    if (fechaInicioValida) {
+      [resultadoMembresia] = await conexion.execute(
+        `INSERT INTO membresia
+          (fk_cliente, fk_plan, fecha_inicio, fecha_vencimiento, precio_pagado, ingresos_incluidos, estado_membresia)
+         VALUES (?, ?, ?, DATE_ADD(?, INTERVAL ? DAY), ?, ?, 'Activa')`,
+        [fk_cliente, fk_plan, fechaInicioValida, fechaInicioValida, plan.duracion_dias, plan.precio, plan.ingresos_incluidos]
+      );
+    } else {
+      [resultadoMembresia] = await conexion.execute(
+        `INSERT INTO membresia
+          (fk_cliente, fk_plan, fecha_inicio, fecha_vencimiento, precio_pagado, ingresos_incluidos, estado_membresia)
+         VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL ? DAY), ?, ?, 'Activa')`,
+        [fk_cliente, fk_plan, plan.duracion_dias, plan.precio, plan.ingresos_incluidos]
+      );
+    }
+
+    const idMembresia = resultadoMembresia.insertId;
+
+    let pagoCreado = null;
+    if (pago) {
+      const estadoPagoFinal = pago.estado_pago || 'Pagado';
+      const [resultadoPago] = await conexion.execute(
+        `INSERT INTO pago (fk_membresia, monto, metodo_pago, estado_pago, fecha_pago)
+         VALUES (?, ?, ?, ?, NOW())`,
+        [idMembresia, plan.precio, pago.metodo_pago, estadoPagoFinal]
+      );
+
+      pagoCreado = {
+        id_pago: resultadoPago.insertId,
+        fk_membresia: idMembresia,
+        monto: plan.precio,
+        metodo_pago: pago.metodo_pago,
+        estado_pago: estadoPagoFinal
+      };
+    }
+
+    await conexion.commit();
+
+    const membresiaCreada = await buscarMembresiaPorId(idMembresia);
+    return { membresia: membresiaCreada, pago: pagoCreado };
+  } catch (error) {
+    await conexion.rollback();
+    throw error;
+  } finally {
+    conexion.release();
+  }
+}
+
 export async function listarMembresiasPorCliente(idCliente) {
   const cliente = await buscarClientePorId(idCliente);
   if (!cliente) {

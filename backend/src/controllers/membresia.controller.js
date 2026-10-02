@@ -5,12 +5,14 @@ import {
   listarMembresiasPorCliente,
   listarMembresiasPorUsuario,
   listarTodasMembresias,
-  registrarMembresia
+  registrarMembresia,
+  registrarMembresiaConPago
 } from '../models/membresia.model.js';
+import { METODOS_PERMITIDOS, ESTADOS_PERMITIDOS } from './pago.controller.js';
 import { errorResponse, successResponse } from '../utils/api-response.js';
 
 export async function crearMembresia(req, res, next) {
-  const { fk_cliente, fk_plan, fecha_inicio } = req.body;
+  const { fk_cliente, fk_plan, fecha_inicio, pago } = req.body;
 
   const idCliente = Number(fk_cliente);
   const idPlan = Number(fk_plan);
@@ -35,7 +37,52 @@ export async function crearMembresia(req, res, next) {
     }
   }
 
+  let pagoValidado = null;
+  if (pago !== undefined && pago !== null) {
+    if (typeof pago !== 'object' || Array.isArray(pago)) {
+      return errorResponse(res, 400, 'El objeto "pago" no es válido', 'VALIDATION_ERROR');
+    }
+
+    if (!METODOS_PERMITIDOS.includes(pago.metodo_pago)) {
+      return errorResponse(
+        res,
+        400,
+        `El método de pago no es válido. Opciones permitidas: ${METODOS_PERMITIDOS.join(', ')}`,
+        'VALIDATION_ERROR'
+      );
+    }
+
+    let estadoPagoFinal = 'Pagado';
+    if (pago.estado_pago !== undefined && pago.estado_pago !== null && String(pago.estado_pago).trim() !== '') {
+      if (!ESTADOS_PERMITIDOS.includes(pago.estado_pago)) {
+        return errorResponse(
+          res,
+          400,
+          `El estado de pago no es válido. Opciones permitidas: ${ESTADOS_PERMITIDOS.join(', ')}`,
+          'VALIDATION_ERROR'
+        );
+      }
+      estadoPagoFinal = pago.estado_pago;
+    }
+
+    pagoValidado = { metodo_pago: pago.metodo_pago, estado_pago: estadoPagoFinal };
+  }
+
   try {
+    if (pagoValidado) {
+      const resultado = await registrarMembresiaConPago({
+        fk_cliente: idCliente,
+        fk_plan: idPlan,
+        fecha_inicio,
+        pago: pagoValidado
+      });
+
+      return successResponse(res, 201, 'Membresía y pago registrados exitosamente', {
+        ...resultado.membresia,
+        pago: resultado.pago
+      });
+    }
+
     const membresia = await registrarMembresia({
       fk_cliente: idCliente,
       fk_plan: idPlan,

@@ -9,8 +9,8 @@ import {
 } from '../models/pago.model.js';
 import { errorResponse, successResponse } from '../utils/api-response.js';
 
-const METODOS_PERMITIDOS = ['Efectivo', 'Tarjeta', 'Transferencia'];
-const ESTADOS_PERMITIDOS = ['Pagado', 'Pendiente', 'Rechazado'];
+export const METODOS_PERMITIDOS = ['Efectivo', 'Tarjeta', 'Transferencia'];
+export const ESTADOS_PERMITIDOS = ['Pagado', 'Pendiente', 'Rechazado'];
 
 export async function crearPago(req, res, next) {
   try {
