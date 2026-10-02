@@ -4,7 +4,9 @@ export function ModalConfirmacion({
   alConfirmar,
   titulo = 'Confirmar acción',
   mensaje = '¿Estás seguro de que deseas realizar esta acción?',
-  cargando = false
+  cargando = false,
+  textoConfirmar = 'Sí, cancelar membresía',
+  textoCargando = 'Cancelando...'
 }) {
   if (!abierto) return null;
 
@@ -29,7 +31,7 @@ export function ModalConfirmacion({
             disabled={cargando}
             className="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition disabled:opacity-50"
           >
-            {cargando ? 'Cancelando...' : 'Sí, cancelar membresía'}
+            {cargando ? textoCargando : textoConfirmar}
           </button>
         </div>
       </div>

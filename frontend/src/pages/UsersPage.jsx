@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react';
 import {
   actualizarEstadoUsuario,
   crearUsuario,
+  desbloquearUsuario,
   obtenerUsuarios
 } from '../services/usuario.service.js';
 import { ModalCrearUsuario } from '../components/usuario/ModalCrearUsuario.jsx';
+import { ModalConfirmacion } from '../components/membresia/ModalConfirmacion.jsx';
 
 export function UsersPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
+  const [usuarioADesbloquear, setUsuarioADesbloquear] = useState(null);
+  const [desbloqueando, setDesbloqueando] = useState(false);
 
   async function cargarUsuarios() {
     try {
@@ -48,6 +52,25 @@ export function UsersPage() {
     }
   }
 
+  async function confirmarDesbloqueo() {
+    if (!usuarioADesbloquear) return;
+
+    setDesbloqueando(true);
+    try {
+      await desbloquearUsuario(usuarioADesbloquear.id_usuario);
+      setUsuarios((prev) => prev.map((actual) => (
+        actual.id_usuario === usuarioADesbloquear.id_usuario
+          ? { ...actual, bloqueado: false }
+          : actual
+      )));
+      setUsuarioADesbloquear(null);
+    } catch (respuestaError) {
+      setError(respuestaError?.message || 'No se pudo desbloquear el usuario.');
+    } finally {
+      setDesbloqueando(false);
+    }
+  }
+
   return (
     <>
       <main className="min-h-screen bg-slate-100 p-6">
@@ -78,6 +101,7 @@ export function UsersPage() {
                 <th className="px-4 py-3">Correo</th>
                 <th className="px-4 py-3">Rol</th>
                 <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3">Bloqueado</th>
                 <th className="px-4 py-3 text-center">Acción</th>
               </tr>
             </thead>
@@ -102,18 +126,38 @@ export function UsersPage() {
                       {usuario.estado}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    {usuario.bloqueado ? (
+                      <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+                        Bloqueado
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      type="button"
-                      onClick={() => cambiarEstado(usuario)}
-                      className={
-                        usuario.estado === 'Activo'
-                          ? 'rounded bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700'
-                          : 'rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700'
-                      }
-                    >
-                      {usuario.estado === 'Activo' ? 'Desactivar' : 'Activar'}
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => cambiarEstado(usuario)}
+                        className={
+                          usuario.estado === 'Activo'
+                            ? 'rounded bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700'
+                            : 'rounded bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700'
+                        }
+                      >
+                        {usuario.estado === 'Activo' ? 'Desactivar' : 'Activar'}
+                      </button>
+                      {usuario.bloqueado && (
+                        <button
+                          type="button"
+                          onClick={() => setUsuarioADesbloquear(usuario)}
+                          className="rounded bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+                        >
+                          Desbloquear
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -127,6 +171,17 @@ export function UsersPage() {
         abierto={modalCrearAbierto}
         alCerrar={() => setModalCrearAbierto(false)}
         alGuardar={crearNuevoUsuario}
+      />
+
+      <ModalConfirmacion
+        abierto={Boolean(usuarioADesbloquear)}
+        alCerrar={() => setUsuarioADesbloquear(null)}
+        alConfirmar={confirmarDesbloqueo}
+        titulo="Desbloquear usuario"
+        mensaje={`¿Estás seguro de que deseas desbloquear a "${usuarioADesbloquear?.nombre}"? Podrá volver a iniciar sesión de inmediato.`}
+        cargando={desbloqueando}
+        textoConfirmar="Sí, desbloquear"
+        textoCargando="Desbloqueando..."
       />
     </>
   );

@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { pool } from '../config/database.js';
+import { MAX_INTENTOS_FALLIDOS, MINUTOS_BLOQUEO } from '../utils/bloqueo-login.js';
 
 export async function buscarRolPorNombre(nombreRol, connection = pool) {
   const [filas] = await connection.execute(
@@ -13,6 +14,7 @@ export async function buscarUsuarioPorCorreo(correo) {
   const [filas] = await pool.execute(
     `SELECT u.id_usuario, u.nombre, u.apellido, u.documento_identidad,
             u.correo, u.contrasena, u.telefono,
+            u.intentos_fallidos, u.bloqueado_hasta, NOW() AS ahora_bd,
             e.id_estado, e.nombre_estado AS estado,
             r.id_rol, r.nombre_rol
        FROM usuario u
@@ -23,6 +25,31 @@ export async function buscarUsuarioPorCorreo(correo) {
     [correo]
   );
   return filas[0] || null;
+}
+
+export async function obtenerEstadoBloqueo(idUsuario) {
+  const [filas] = await pool.execute(
+    'SELECT bloqueado_hasta, NOW() AS ahora_bd FROM usuario WHERE id_usuario = ? LIMIT 1',
+    [idUsuario]
+  );
+  return filas[0] || null;
+}
+
+export async function registrarIntentoFallido(idUsuario) {
+  await pool.execute(
+    `UPDATE usuario
+        SET intentos_fallidos = IF(bloqueado_hasta IS NOT NULL AND bloqueado_hasta <= NOW(), 1, intentos_fallidos + 1),
+            bloqueado_hasta = IF(intentos_fallidos >= ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NULL)
+      WHERE id_usuario = ?`,
+    [MAX_INTENTOS_FALLIDOS, MINUTOS_BLOQUEO, idUsuario]
+  );
+}
+
+export async function reiniciarIntentosFallidos(idUsuario) {
+  await pool.execute(
+    'UPDATE usuario SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE id_usuario = ?',
+    [idUsuario]
+  );
 }
 
 export async function crearUsuarioConExtension(datos) {

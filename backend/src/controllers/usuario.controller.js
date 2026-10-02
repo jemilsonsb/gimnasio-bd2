@@ -1,5 +1,6 @@
 import {
 	cambiarEstadoUsuario,
+	desbloquearUsuario,
 	listarUsuarios
 } from '../models/usuario.model.js';
 import { crearUsuarioConExtension } from '../models/autenticacion.model.js';
@@ -61,6 +62,22 @@ export async function actualizarEstadoUsuario(req, res, next) {
 		return successResponse(res, 200, 'Estado del usuario actualizado correctamente', {
 			id_usuario: Number(req.params.id),
 			estado
+		});
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function desbloquearUsuarioController(req, res, next) {
+	try {
+		const filasActualizadas = await desbloquearUsuario(req.params.id);
+
+		if (filasActualizadas === 0) {
+			return errorResponse(res, 404, 'Usuario no encontrado', 'USER_NOT_FOUND');
+		}
+
+		return successResponse(res, 200, 'Usuario desbloqueado correctamente', {
+			id_usuario: Number(req.params.id)
 		});
 	} catch (error) {
 		return next(error);

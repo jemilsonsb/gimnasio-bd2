@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
 	actualizarEstadoUsuario,
 	crearUsuarioController,
+	desbloquearUsuarioController,
 	obtenerUsuarios
 } from '../controllers/usuario.controller.js';
 import { autenticarUsuario } from '../middlewares/auth.middleware.js';
@@ -18,5 +19,6 @@ usuarioRoutes.post(
 	crearUsuarioController
 );
 usuarioRoutes.patch('/:id/estado', actualizarEstadoUsuario);
+usuarioRoutes.patch('/:id/desbloquear', desbloquearUsuarioController);
 
 export default usuarioRoutes;

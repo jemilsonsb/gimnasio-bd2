@@ -28,3 +28,10 @@ export function actualizarEstadoUsuario(idUsuario, estado) {
     body: JSON.stringify({ estado })
   });
 }
+
+export function desbloquearUsuario(idUsuario) {
+  return apiRequest(`/usuarios/${idUsuario}/desbloquear`, {
+    method: 'PATCH',
+    headers: headersAutenticados()
+  });
+}

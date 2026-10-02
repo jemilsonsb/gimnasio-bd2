@@ -1,10 +1,24 @@
 import {
   buscarUsuarioPorCorreo,
   crearUsuarioConExtension,
+  obtenerEstadoBloqueo,
+  registrarIntentoFallido,
+  reiniciarIntentosFallidos,
   verificarContrasena
 } from '../models/autenticacion.model.js';
 import { crearToken } from '../utils/jwt.js';
 import { errorResponse, successResponse } from '../utils/api-response.js';
+import { estaBloqueado, minutosRestantes } from '../utils/bloqueo-login.js';
+
+function respuestaCuentaBloqueada(res, bloqueadoHasta, ahora) {
+  const minutos = minutosRestantes(bloqueadoHasta, ahora);
+  return errorResponse(
+    res,
+    429,
+    `Cuenta bloqueada temporalmente por intentos fallidos. Intenta de nuevo en ${minutos} minuto(s).`,
+    'ACCOUNT_LOCKED'
+  );
+}
 
 export function usuarioPublico(usuario) {
   return {
@@ -51,9 +65,26 @@ export async function iniciarSesion(req, res, next) {
     const correo = req.body.correo.trim().toLowerCase();
     const usuario = await buscarUsuarioPorCorreo(correo);
 
-    if (!usuario || !(await verificarContrasena(req.body.contrasena, usuario.contrasena))) {
+    if (!usuario) {
       return errorResponse(res, 401, 'Correo o contraseña incorrectos', 'INVALID_CREDENTIALS');
     }
+
+    if (estaBloqueado(usuario.bloqueado_hasta, usuario.ahora_bd)) {
+      return respuestaCuentaBloqueada(res, usuario.bloqueado_hasta, usuario.ahora_bd);
+    }
+
+    if (!(await verificarContrasena(req.body.contrasena, usuario.contrasena))) {
+      await registrarIntentoFallido(usuario.id_usuario);
+
+      const estadoBloqueo = await obtenerEstadoBloqueo(usuario.id_usuario);
+      if (estaBloqueado(estadoBloqueo.bloqueado_hasta, estadoBloqueo.ahora_bd)) {
+        return respuestaCuentaBloqueada(res, estadoBloqueo.bloqueado_hasta, estadoBloqueo.ahora_bd);
+      }
+
+      return errorResponse(res, 401, 'Correo o contraseña incorrectos', 'INVALID_CREDENTIALS');
+    }
+
+    await reiniciarIntentosFallidos(usuario.id_usuario);
 
     if ((usuario.estado ?? usuario.nombre_estado) !== 'Activo') {
       return errorResponse(res, 403, 'El usuario está inactivo', 'INACTIVE_USER');
