@@ -70,7 +70,9 @@ export function ReportesPage() {
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-6xl rounded-xl bg-white p-6 shadow-md">
         <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Administración</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            {esAdministrador ? 'Administración' : 'Entrenamiento'}
+          </p>
           <h1 className="text-2xl font-bold text-slate-800 sm:text-3xl">Reportes</h1>
         </div>
 
