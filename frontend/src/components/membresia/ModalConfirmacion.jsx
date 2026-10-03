@@ -12,7 +12,7 @@ export function ModalConfirmacion({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-150">
+      <div className="w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-150">
         <h3 className="text-lg font-bold text-slate-800">{titulo}</h3>
         <p className="mt-2 text-sm text-slate-600">{mensaje}</p>
 

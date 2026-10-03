@@ -66,7 +66,7 @@ export function ModalEditarMembresia({ abierto, alCerrar, alGuardar, membresia, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
             <h2 className="text-xl font-bold text-slate-800">Editar Membresía</h2>

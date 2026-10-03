@@ -1,27 +1,29 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { obtenerDashboard } from '../services/dashboard.service.js';
+import { IconoAcceso } from '../components/dashboard/IconoAcceso.jsx';
+import { SkeletonDashboard } from '../components/dashboard/SkeletonDashboard.jsx';
 
 const ACCESOS_RAPIDOS = {
   Administrador: [
-    { to: '/usuarios', etiqueta: 'Usuarios', icono: '👥' },
-    { to: '/admin/planes', etiqueta: 'Planes', icono: '📋' },
-    { to: '/admin/membresias', etiqueta: 'Membresías', icono: '🎫' },
-    { to: '/admin/clases', etiqueta: 'Clases', icono: '🏋️' },
-    { to: '/admin/reportes', etiqueta: 'Reportes', icono: '📊' }
+    { to: '/usuarios', etiqueta: 'Usuarios', icono: 'usuarios' },
+    { to: '/admin/planes', etiqueta: 'Planes', icono: 'planes' },
+    { to: '/admin/membresias', etiqueta: 'Membresías', icono: 'membresias' },
+    { to: '/admin/clases', etiqueta: 'Clases', icono: 'clases' },
+    { to: '/admin/reportes', etiqueta: 'Reportes', icono: 'reportes' }
   ],
   Entrenador: [
-    { to: '/admin/clases', etiqueta: 'Clases', icono: '🏋️' },
-    { to: '/admin/rutinas', etiqueta: 'Rutinas', icono: '📝' },
-    { to: '/admin/ejercicios', etiqueta: 'Ejercicios', icono: '💪' },
-    { to: '/admin/reportes', etiqueta: 'Reportes', icono: '📊' }
+    { to: '/admin/clases', etiqueta: 'Clases', icono: 'clases' },
+    { to: '/admin/rutinas', etiqueta: 'Rutinas', icono: 'rutinas' },
+    { to: '/admin/ejercicios', etiqueta: 'Ejercicios', icono: 'ejercicios' },
+    { to: '/admin/reportes', etiqueta: 'Reportes', icono: 'reportes' }
   ],
   Cliente: [
-    { to: '/mi-membresia', etiqueta: 'Mi Membresía', icono: '🎫' },
-    { to: '/mi-rutina', etiqueta: 'Mi Rutina', icono: '📝' },
-    { to: '/reservar-clase', etiqueta: 'Reservar Clase', icono: '📅' },
-    { to: '/mis-reservas', etiqueta: 'Mis Reservas', icono: '✅' },
-    { to: '/mi-ficha-tecnica', etiqueta: 'Mi Ficha Técnica', icono: '📈' }
+    { to: '/mi-membresia', etiqueta: 'Mi Membresía', icono: 'membresias' },
+    { to: '/mi-rutina', etiqueta: 'Mi Rutina', icono: 'rutinas' },
+    { to: '/reservar-clase', etiqueta: 'Reservar Clase', icono: 'reservar' },
+    { to: '/mis-reservas', etiqueta: 'Mis Reservas', icono: 'reservas' },
+    { to: '/mi-ficha-tecnica', etiqueta: 'Mi Ficha Técnica', icono: 'ficha' }
   ]
 };
 
@@ -296,17 +298,15 @@ export function DashboardPage() {
             to={acceso.to}
             className="flex flex-col items-center justify-center gap-2 rounded-xl bg-white p-5 text-center shadow-md transition hover:bg-slate-50"
           >
-            <span className="text-3xl">{acceso.icono}</span>
+            <span className="text-sky-700">
+              <IconoAcceso nombre={acceso.icono} />
+            </span>
             <span className="text-sm font-semibold text-slate-700">{acceso.etiqueta}</span>
           </Link>
         ))}
       </div>
 
-      {cargando && (
-        <div className="rounded-xl bg-white p-8 text-center text-sm text-slate-500 shadow-md">
-          Cargando información del panel...
-        </div>
-      )}
+      {cargando && <SkeletonDashboard rol={usuario?.nombre_rol} />}
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
