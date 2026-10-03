@@ -9,7 +9,7 @@ export const environment = {
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     ssl: process.env.DB_SSL === 'true'
-      ? (process.env.DB_SSL_CA ? { ca: process.env.DB_SSL_CA } : { rejectUnauthorized: false })
+      ? (process.env.DB_SSL_CA ? { ca: process.env.DB_SSL_CA.replace(/\\n/g, '\n') } : { rejectUnauthorized: false })
       : undefined
   },
   jwt: {
