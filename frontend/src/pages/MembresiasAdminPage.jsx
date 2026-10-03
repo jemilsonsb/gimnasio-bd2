@@ -4,6 +4,7 @@ import { ModalConfirmacion } from '../components/membresia/ModalConfirmacion.jsx
 import { ModalEditarMembresia } from '../components/membresia/ModalEditarMembresia.jsx';
 import { ModalPagos } from '../components/pago/ModalPagos.jsx';
 import { obtenerClientes } from '../services/cliente.service.js';
+import { formatearMoneda } from '../utils/moneda.js';
 import {
   asignarMembresia,
   cancelarMembresia,
@@ -25,7 +26,7 @@ export function MembresiasAdminPage() {
   const [membresiaAEditar, setMembresiaAEditar] = useState(null);
 
   useEffect(() => {
-    document.title = 'Control de Membresías | Gimnasio BD2';
+    document.title = 'Control de Membresías | Gimnasio';
     cargarDatos();
   }, []);
 
@@ -199,7 +200,7 @@ export function MembresiasAdminPage() {
                         {m.fecha_vencimiento}
                       </td>
                       <td className="px-4 py-3 font-semibold text-slate-800">
-                        ${Number(m.precio_pagado).toFixed(2)}
+                        {formatearMoneda(m.precio_pagado)}
                       </td>
                       <td className="px-4 py-3">{renderBadgeVigencia(m)}</td>
                       <td className="px-4 py-3 text-center">

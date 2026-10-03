@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registrarUsuario } from '../services/autenticacion.service.js';
 import { BotonEnviar } from '../components/auth/BotonEnviar.jsx';
@@ -23,6 +23,10 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Crear cuenta | Gimnasio';
+  }, []);
 
   function manejarCambio(event) {
     const { name, value } = event.target;

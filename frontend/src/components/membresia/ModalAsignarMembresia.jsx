@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { obtenerFechaHoyLocal, formatearFechaLocal } from '../../utils/fecha.js';
 import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
+import { formatearMoneda } from '../../utils/moneda.js';
 
 export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes = [], planes = [] }) {
   const hoy = obtenerFechaHoyLocal();
@@ -158,7 +159,7 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
                   .filter((p) => p.activo)
                   .map((p) => (
                     <option key={p.id_plan} value={p.id_plan}>
-                      {p.nombre_plan} (${p.precio} / {p.duracion_dias} días)
+                      {p.nombre_plan} ({formatearMoneda(p.precio)} / {p.duracion_dias} días)
                     </option>
                   ))}
               </select>
@@ -194,7 +195,7 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
                   <div>
                     <span className="text-slate-500">Precio a pagar:</span>{' '}
                     <span className="font-semibold text-slate-800">
-                      ${planSeleccionado.precio}
+                      {formatearMoneda(planSeleccionado.precio)}
                     </span>
                   </div>
                   <div className="col-span-2 pt-1 border-t border-sky-200">
@@ -255,7 +256,7 @@ export function ModalAsignarMembresia({ abierto, alCerrar, alGuardar, clientes =
                   <div className="col-span-2 text-sm text-slate-600">
                     Monto a cobrar:{' '}
                     <span className="font-semibold text-slate-800">
-                      {planSeleccionado ? `$${planSeleccionado.precio}` : '—'}
+                      {planSeleccionado ? formatearMoneda(planSeleccionado.precio) : '—'}
                     </span>
                   </div>
                 </div>

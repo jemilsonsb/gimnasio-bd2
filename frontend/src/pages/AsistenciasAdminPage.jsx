@@ -19,7 +19,7 @@ export function AsistenciasAdminPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    document.title = 'Control de Asistencia | Gimnasio BD2';
+    document.title = 'Control de Asistencia | Gimnasio';
     cargarClientes();
   }, []);
 

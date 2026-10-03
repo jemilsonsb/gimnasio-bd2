@@ -11,7 +11,7 @@ export function EjerciciosAdminPage() {
   const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
 
   useEffect(() => {
-    document.title = 'Catálogo de Ejercicios | Gimnasio BD2';
+    document.title = 'Catálogo de Ejercicios | Gimnasio';
     cargarEjercicios();
   }, []);
 

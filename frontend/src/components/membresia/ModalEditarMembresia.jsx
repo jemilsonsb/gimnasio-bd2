@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { editarMembresia } from '../../services/membresia.service.js';
 import { formatearFechaLocal } from '../../utils/fecha.js';
+import { formatearMoneda } from '../../utils/moneda.js';
 
 export function ModalEditarMembresia({ abierto, alCerrar, alGuardar, membresia, planes = [] }) {
   const [fkPlan, setFkPlan] = useState('');
@@ -104,7 +105,7 @@ export function ModalEditarMembresia({ abierto, alCerrar, alGuardar, membresia, 
               <div className="mt-2 text-sm text-emerald-700">
                 Precio pagado actualizado:{' '}
                 <span className="font-semibold">
-                  ${Number(confirmacionExito.precio_pagado).toFixed(2)}
+                  {formatearMoneda(confirmacionExito.precio_pagado)}
                 </span>
               </div>
             </div>
@@ -142,7 +143,7 @@ export function ModalEditarMembresia({ abierto, alCerrar, alGuardar, membresia, 
                   .filter((p) => p.activo)
                   .map((p) => (
                     <option key={p.id_plan} value={p.id_plan}>
-                      {p.nombre_plan} (${p.precio} / {p.duracion_dias} días)
+                      {p.nombre_plan} ({formatearMoneda(p.precio)} / {p.duracion_dias} días)
                     </option>
                   ))}
               </select>
@@ -178,7 +179,7 @@ export function ModalEditarMembresia({ abierto, alCerrar, alGuardar, membresia, 
                   <div>
                     <span className="text-slate-500">Precio actualizado:</span>{' '}
                     <span className="font-semibold text-slate-800">
-                      ${Number(precioEstimado).toFixed(2)}
+                      {formatearMoneda(precioEstimado)}
                     </span>
                   </div>
                   <div className="col-span-2 pt-1 border-t border-sky-200">

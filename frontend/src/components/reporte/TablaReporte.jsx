@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react';
 import { descargarCSV } from '../../utils/csv.js';
+import { formatearMoneda, valorNumerico } from '../../utils/moneda.js';
+
+function esNumero(valor) {
+  return valor !== null && valor !== undefined && valor !== '' && Number.isFinite(Number(valor));
+}
 
 export function TablaReporte({ columnas, filas, nombreArchivo, cargando = false }) {
   const [busqueda, setBusqueda] = useState('');
@@ -20,7 +25,10 @@ export function TablaReporte({ columnas, filas, nombreArchivo, cargando = false 
       const valorA = a[orden.columna];
       const valorB = b[orden.columna];
       if (valorA === valorB) return 0;
-      const comparacion = valorA > valorB ? 1 : -1;
+      const comparacion =
+        esNumero(valorA) && esNumero(valorB)
+          ? Number(valorA) - Number(valorB)
+          : valorA > valorB ? 1 : -1;
       return orden.direccion === 'asc' ? comparacion : -comparacion;
     });
     return copia;
@@ -38,7 +46,7 @@ export function TablaReporte({ columnas, filas, nombreArchivo, cargando = false 
     columnas.forEach((columna) => {
       if (columna.total) {
         resultado[columna.key] = filasOrdenadas.reduce(
-          (suma, fila) => suma + (Number(fila[columna.key]) || 0),
+          (suma, fila) => suma + valorNumerico(fila[columna.key]),
           0
         );
       }
@@ -115,7 +123,11 @@ export function TablaReporte({ columnas, filas, nombreArchivo, cargando = false 
                 <tr className="border-t-2 border-slate-300 bg-slate-100 font-semibold text-slate-800">
                   {columnas.map((columna) => (
                     <td key={columna.key} className="px-4 py-3">
-                      {columna.total ? totales[columna.key].toFixed(2) : ''}
+                      {columna.total
+                        ? columna.moneda
+                          ? formatearMoneda(totales[columna.key])
+                          : totales[columna.key]
+                        : ''}
                     </td>
                   ))}
                 </tr>

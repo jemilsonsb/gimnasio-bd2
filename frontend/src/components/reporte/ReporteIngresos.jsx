@@ -4,6 +4,7 @@ import { obtenerClientes } from '../../services/cliente.service.js';
 import { obtenerPlanes } from '../../services/plan.service.js';
 import { TablaReporte } from './TablaReporte.jsx';
 import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
+import { formatearMoneda } from '../../utils/moneda.js';
 
 const COLUMNAS = [
   { key: 'fecha_pago', header: 'Fecha' },
@@ -12,7 +13,7 @@ const COLUMNAS = [
   { key: 'nombre_plan', header: 'Plan' },
   { key: 'metodo_pago', header: 'Método' },
   { key: 'estado_pago', header: 'Estado' },
-  { key: 'monto', header: 'Monto', total: true }
+  { key: 'monto', header: 'Monto', total: true, moneda: true, formato: formatearMoneda }
 ];
 
 export function ReporteIngresos({ modo = 'general' }) {
@@ -132,15 +133,15 @@ export function ReporteIngresos({ modo = 'general' }) {
           <div className="mb-4 grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
               <p className="text-xs font-semibold uppercase text-emerald-700">Total pagado</p>
-              <p className="text-2xl font-bold text-emerald-800">${Number(resultado.resumen.total_pagado).toFixed(2)}</p>
+              <p className="text-2xl font-bold text-emerald-800">{formatearMoneda(resultado.resumen.total_pagado)}</p>
             </div>
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
               <p className="text-xs font-semibold uppercase text-amber-700">Pendiente</p>
-              <p className="text-2xl font-bold text-amber-800">${Number(resultado.resumen.total_pendiente).toFixed(2)}</p>
+              <p className="text-2xl font-bold text-amber-800">{formatearMoneda(resultado.resumen.total_pendiente)}</p>
             </div>
             <div className="rounded-lg border border-red-200 bg-red-50 p-4">
               <p className="text-xs font-semibold uppercase text-red-700">Rechazado</p>
-              <p className="text-2xl font-bold text-red-800">${Number(resultado.resumen.total_rechazado).toFixed(2)}</p>
+              <p className="text-2xl font-bold text-red-800">{formatearMoneda(resultado.resumen.total_rechazado)}</p>
             </div>
           </div>
 
@@ -151,7 +152,7 @@ export function ReporteIngresos({ modo = 'general' }) {
                 {resultado.resumen.por_metodo_pago.map((fila) => (
                   <li key={fila.metodo_pago} className="flex justify-between">
                     <span>{fila.metodo_pago}</span>
-                    <span className="font-semibold">${Number(fila.total).toFixed(2)} ({fila.cantidad})</span>
+                    <span className="font-semibold">{formatearMoneda(fila.total)} ({fila.cantidad})</span>
                   </li>
                 ))}
                 {resultado.resumen.por_metodo_pago.length === 0 && <li>Sin datos.</li>}
@@ -163,7 +164,7 @@ export function ReporteIngresos({ modo = 'general' }) {
                 {resultado.resumen.por_plan.map((fila) => (
                   <li key={fila.id_plan} className="flex justify-between">
                     <span>{fila.nombre_plan}</span>
-                    <span className="font-semibold">${Number(fila.total).toFixed(2)} ({fila.cantidad})</span>
+                    <span className="font-semibold">{formatearMoneda(fila.total)} ({fila.cantidad})</span>
                   </li>
                 ))}
                 {resultado.resumen.por_plan.length === 0 && <li>Sin datos.</li>}

@@ -4,6 +4,7 @@ import { obtenerClientes } from '../../services/cliente.service.js';
 import { obtenerPlanes } from '../../services/plan.service.js';
 import { TablaReporte } from './TablaReporte.jsx';
 import { SelectorBusqueda } from '../common/SelectorBusqueda.jsx';
+import { formatearMoneda } from '../../utils/moneda.js';
 
 const COLUMNAS = [
   { key: 'fecha_inicio', header: 'Inicio' },
@@ -12,7 +13,7 @@ const COLUMNAS = [
   { key: 'correo_cliente', header: 'Correo' },
   { key: 'nombre_plan', header: 'Plan' },
   { key: 'estado_membresia', header: 'Estado' },
-  { key: 'precio_pagado', header: 'Precio pagado', total: true }
+  { key: 'precio_pagado', header: 'Precio pagado', total: true, moneda: true, formato: formatearMoneda }
 ];
 
 export function ReporteMembresias({ modo = 'general' }) {

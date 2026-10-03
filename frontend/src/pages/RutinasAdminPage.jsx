@@ -23,7 +23,7 @@ export function RutinasAdminPage() {
   const [clienteParaFicha, setClienteParaFicha] = useState(null);
 
   useEffect(() => {
-    document.title = 'Gestión de Rutinas | Gimnasio BD2';
+    document.title = 'Gestión de Rutinas | Gimnasio';
     cargarDatos();
   }, []);
 

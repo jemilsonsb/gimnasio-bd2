@@ -27,7 +27,7 @@ export function ClasesAdminPage() {
   const rolUsuario = usuario?.nombre_rol || '';
 
   useEffect(() => {
-    document.title = 'Gestión de Clases | Gimnasio BD2';
+    document.title = 'Gestión de Clases | Gimnasio';
     cargarDatos();
   }, []);
 

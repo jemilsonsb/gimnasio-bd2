@@ -10,7 +10,7 @@ export function MisReservasPage() {
   const [cancelando, setCancelando] = useState(false);
 
   useEffect(() => {
-    document.title = 'Mis Reservas | Gimnasio BD2';
+    document.title = 'Mis Reservas | Gimnasio';
     cargarReservas();
   }, []);
 

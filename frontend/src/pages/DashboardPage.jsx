@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { obtenerDashboard } from '../services/dashboard.service.js';
 import { IconoAcceso } from '../components/dashboard/IconoAcceso.jsx';
 import { SkeletonDashboard } from '../components/dashboard/SkeletonDashboard.jsx';
+import { formatearMoneda } from '../utils/moneda.js';
 
 const ACCESOS_RAPIDOS = {
   Administrador: [
@@ -50,7 +51,7 @@ function SeccionAdministrador({ datos }) {
         <TarjetaNumero etiqueta="Membresías activas" valor={datos.membresias_activas} />
         <TarjetaNumero
           etiqueta="Ingresos del mes"
-          valor={`$${Number(datos.ingresos_mes).toFixed(2)}`}
+          valor={formatearMoneda(datos.ingresos_mes)}
           acento="text-emerald-600"
         />
         <TarjetaNumero
@@ -84,7 +85,7 @@ function SeccionAdministrador({ datos }) {
           columnas={['Cliente', 'Monto', 'Estado']}
           filas={datos.ultimos_pagos.map((p) => [
             p.nombre_cliente,
-            `$${Number(p.monto).toFixed(2)}`,
+            formatearMoneda(p.monto),
             p.estado_pago
           ])}
           vacio="Aún no hay pagos registrados."
@@ -257,7 +258,7 @@ export function DashboardPage() {
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
 
   useEffect(() => {
-    document.title = 'Panel Principal | Gimnasio BD2';
+    document.title = 'Panel Principal | Gimnasio';
     cargarDashboard();
   }, []);
 

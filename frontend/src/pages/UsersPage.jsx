@@ -28,7 +28,7 @@ export function UsersPage() {
   }
 
   useEffect(() => {
-    document.title = 'Administración de usuarios';
+    document.title = 'Usuarios | Gimnasio';
     cargarUsuarios();
   }, []);
 

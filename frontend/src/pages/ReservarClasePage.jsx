@@ -9,7 +9,7 @@ export function ReservarClasePage() {
   const [reservandoId, setReservandoId] = useState(null);
 
   useEffect(() => {
-    document.title = 'Reservar Clase | Gimnasio BD2';
+    document.title = 'Reservar Clase | Gimnasio';
     cargarClasesDisponibles();
   }, []);
 

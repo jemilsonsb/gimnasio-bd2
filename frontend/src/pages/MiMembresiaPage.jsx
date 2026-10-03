@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { obtenerMisAsistencias } from '../services/asistencia.service.js';
 import { obtenerHistorialUsuario } from '../services/membresia.service.js';
 import { obtenerPagosPorMembresia } from '../services/pago.service.js';
+import { formatearMoneda } from '../utils/moneda.js';
 
 const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -30,7 +31,7 @@ export function MiMembresiaPage() {
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
 
   useEffect(() => {
-    document.title = 'Mi Membresía | Gimnasio BD2';
+    document.title = 'Mi Membresía | Gimnasio';
 
     if (!usuario?.id_usuario) {
       setError('No se pudo identificar tu sesión.');
@@ -172,7 +173,7 @@ export function MiMembresiaPage() {
                   <div className="rounded-xl bg-white/5 p-4 backdrop-blur">
                     <p className="text-xs text-slate-300">Precio Pagado</p>
                     <p className="mt-1 text-lg font-bold text-white">
-                      ${Number(membresiaActiva.precio_pagado).toFixed(2)}
+                      {formatearMoneda(membresiaActiva.precio_pagado)}
                     </p>
                   </div>
                 </div>
@@ -307,7 +308,7 @@ export function MiMembresiaPage() {
                               {p.fecha_pago ? new Date(p.fecha_pago).toLocaleDateString() : 'N/A'}
                             </td>
                             <td className="px-4 py-3 font-semibold text-slate-800">
-                              ${Number(p.monto).toFixed(2)}
+                              {formatearMoneda(p.monto)}
                             </td>
                             <td className="px-4 py-3 text-slate-600">{p.metodo_pago}</td>
                             <td className="px-4 py-3">
@@ -368,7 +369,7 @@ export function MiMembresiaPage() {
                             {m.fecha_vencimiento}
                           </td>
                           <td className="px-4 py-3 font-medium text-slate-800">
-                            ${Number(m.precio_pagado).toFixed(2)}
+                            {formatearMoneda(m.precio_pagado)}
                           </td>
                           <td className="px-4 py-3">
                             <span

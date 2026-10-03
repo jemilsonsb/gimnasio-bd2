@@ -167,7 +167,7 @@ export function ModalPlan({ abierto, alCerrar, alGuardar, plan = null }) {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Precio ($) *
+                Precio (COP) *
               </label>
               <input
                 type="number"

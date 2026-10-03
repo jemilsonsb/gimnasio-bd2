@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { iniciarSesion } from '../services/autenticacion.service.js';
 import { BotonEnviar } from '../components/auth/BotonEnviar.jsx';
@@ -11,6 +11,10 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Iniciar sesión | Gimnasio';
+  }, []);
 
   function manejarCambio(event) {
     const { name, value } = event.target;

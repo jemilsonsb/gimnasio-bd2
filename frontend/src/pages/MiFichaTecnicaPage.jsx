@@ -11,7 +11,7 @@ export function MiFichaTecnicaPage() {
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
 
   useEffect(() => {
-    document.title = 'Mi Ficha Técnica | Gimnasio BD2';
+    document.title = 'Mi Ficha Técnica | Gimnasio';
 
     if (!usuario?.id_usuario) {
       setError('No se pudo identificar tu sesión.');

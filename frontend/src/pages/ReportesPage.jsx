@@ -58,7 +58,7 @@ export function ReportesPage() {
   const [subPestanaEspecifico, setSubPestanaEspecifico] = useState(especificos[0]?.id);
 
   useEffect(() => {
-    document.title = 'Reportes';
+    document.title = 'Reportes | Gimnasio';
   }, []);
 
   const listaActiva = pestana === 'generales' ? generales : especificos;

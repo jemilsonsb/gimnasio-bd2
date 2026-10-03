@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { obtenerPagosPorMembresia, registrarPago } from '../../services/pago.service.js';
+import { formatearMoneda } from '../../utils/moneda.js';
 
 export function ModalPagos({ abierto, alCerrar, membresia }) {
   const [pagos, setPagos] = useState([]);
@@ -142,7 +143,7 @@ export function ModalPagos({ abierto, alCerrar, membresia }) {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  Monto ($) *
+                  Monto (COP) *
                 </label>
                 <input
                   type="number"
@@ -235,7 +236,7 @@ export function ModalPagos({ abierto, alCerrar, membresia }) {
                         {pago.fecha_pago ? new Date(pago.fecha_pago).toLocaleDateString() : 'N/A'}
                       </td>
                       <td className="px-3 py-2 font-bold text-slate-800">
-                        ${Number(pago.monto).toFixed(2)}
+                        {formatearMoneda(pago.monto)}
                       </td>
                       <td className="px-3 py-2 text-slate-600">
                         {pago.metodo_pago}

@@ -24,7 +24,7 @@ export function MiRutinaPage() {
   const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
 
   useEffect(() => {
-    document.title = 'Mi Rutina | Gimnasio BD2';
+    document.title = 'Mi Rutina | Gimnasio';
 
     if (!usuario?.id_usuario) {
       setError('No se pudo identificar tu sesión.');

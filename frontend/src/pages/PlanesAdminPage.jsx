@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ModalPlan } from '../components/membresia/ModalPlan.jsx';
+import { formatearMoneda } from '../utils/moneda.js';
 import {
   actualizarPlan,
   crearPlan,
@@ -14,7 +15,7 @@ export function PlanesAdminPage() {
   const [planAEditar, setPlanAEditar] = useState(null);
 
   useEffect(() => {
-    document.title = 'Gestión de Planes | Gimnasio BD2';
+    document.title = 'Gestión de Planes | Gimnasio';
     cargarPlanes();
   }, []);
 
@@ -129,7 +130,7 @@ export function PlanesAdminPage() {
                       {plan.duracion_dias} días
                     </td>
                     <td className="px-4 py-3 font-semibold text-slate-800">
-                      ${Number(plan.precio).toFixed(2)}
+                      {formatearMoneda(plan.precio)}
                     </td>
                     <td className="px-4 py-3 text-slate-700">
                       {plan.ingresos_incluidos ?? 'Ilimitado'}
