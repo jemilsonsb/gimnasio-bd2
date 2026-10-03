@@ -9,5 +9,6 @@ export const pool = mysql.createPool({
   password: environment.database.password,
   waitForConnections: true,
   connectionLimit: 10,
-  dateStrings: true
+  dateStrings: true,
+  ...(environment.database.ssl ? { ssl: environment.database.ssl } : {})
 });

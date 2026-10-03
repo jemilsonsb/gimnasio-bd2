@@ -7,7 +7,10 @@ export const environment = {
     port: Number(process.env.DB_PORT || 3306),
     name: process.env.DB_NAME || 'gimnasio_bd2',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || ''
+    password: process.env.DB_PASSWORD || '',
+    ssl: process.env.DB_SSL === 'true'
+      ? (process.env.DB_SSL_CA ? { ca: process.env.DB_SSL_CA } : { rejectUnauthorized: false })
+      : undefined
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'clave-local-no-usar-en-produccion',
