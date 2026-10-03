@@ -74,6 +74,19 @@ export async function crearUsuarioConExtension(datos) {
       throw error;
     }
 
+    let idNivelAccesoTotal = null;
+    if (rol.nombre_rol === 'Administrador') {
+      const [nivelesTotal] = await connection.execute(
+        "SELECT id_nivel_acceso FROM nivel_acceso WHERE nombre_nivel_acceso = 'Total' LIMIT 1"
+      );
+      if (!nivelesTotal[0]) {
+        const error = new Error("No está configurado el nivel de acceso 'Total'");
+        error.code = 'NIVEL_ACCESO_NOT_FOUND';
+        throw error;
+      }
+      idNivelAccesoTotal = nivelesTotal[0].id_nivel_acceso;
+    }
+
     const contrasenaHash = await bcrypt.hash(datos.contrasena, 12);
     const [resultadoUsuario] = await connection.execute(
       `INSERT INTO usuario
@@ -105,14 +118,19 @@ export async function crearUsuarioConExtension(datos) {
       throw error;
     }
 
-    const columnasCliente = rol.nombre_rol === 'Cliente' ? ', codigo_miembro' : '';
-    const valoresCliente = rol.nombre_rol === 'Cliente' ? ', ?' : '';
-    const parametros = rol.nombre_rol === 'Cliente'
-      ? [idUsuario, datos.codigoMiembro || `CLI-${idUsuario}`]
-      : [idUsuario];
+    const columnasExtension = ['fk_usuario'];
+    const parametros = [idUsuario];
+    if (rol.nombre_rol === 'Cliente') {
+      columnasExtension.push('codigo_miembro');
+      parametros.push(datos.codigoMiembro || `CLI-${idUsuario}`);
+    }
+    if (rol.nombre_rol === 'Administrador') {
+      columnasExtension.push('fk_nivel_acceso');
+      parametros.push(idNivelAccesoTotal);
+    }
 
     await connection.execute(
-      `INSERT INTO ${tablaExtension} (fk_usuario${columnasCliente}) VALUES (?${valoresCliente})`,
+      `INSERT INTO ${tablaExtension} (${columnasExtension.join(', ')}) VALUES (${columnasExtension.map(() => '?').join(', ')})`,
       parametros
     );
 

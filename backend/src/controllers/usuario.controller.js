@@ -36,6 +36,14 @@ export async function crearUsuarioController(req, res, next) {
 		if (error.code === 'ROLE_NOT_FOUND') {
 			return errorResponse(res, 400, error.message, error.code);
 		}
+		if (error.code === 'NIVEL_ACCESO_NOT_FOUND') {
+			return errorResponse(
+				res,
+				500,
+				'No se puede crear el administrador: falta el nivel de acceso "Total" en la base de datos. Contacte al responsable del sistema.',
+				error.code
+			);
+		}
 		return next(error);
 	}
 }
