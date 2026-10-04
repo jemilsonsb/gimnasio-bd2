@@ -282,10 +282,11 @@ export async function obtenerReporteClientes({ fechaInicio, fechaFin, estado } =
      FROM cliente c
      INNER JOIN usuario u ON u.id_usuario = c.fk_usuario
      INNER JOIN estado e ON e.id_estado = u.fk_estado
-     WHERE e.nombre_estado = 'Activo'`
+     INNER JOIN rol r ON r.id_rol = u.fk_rol
+     WHERE e.nombre_estado = 'Activo' AND r.nombre_rol = 'Cliente'`
   );
 
-  const condicionesNuevos = [];
+  const condicionesNuevos = ["r.nombre_rol = 'Cliente'"];
   const parametrosNuevos = [];
   if (fechaInicio) {
     condicionesNuevos.push('u.fecha_registro >= ?');
@@ -301,11 +302,12 @@ export async function obtenerReporteClientes({ fechaInicio, fechaFin, estado } =
     `SELECT COUNT(*) AS nuevos_periodo
      FROM cliente c
      INNER JOIN usuario u ON u.id_usuario = c.fk_usuario
+     INNER JOIN rol r ON r.id_rol = u.fk_rol
      ${whereNuevos}`,
     parametrosNuevos
   );
 
-  const condicionesDetalle = [];
+  const condicionesDetalle = ["r.nombre_rol = 'Cliente'"];
   const parametrosDetalle = [];
   if (estado) {
     condicionesDetalle.push('e.nombre_estado = ?');
@@ -329,6 +331,7 @@ export async function obtenerReporteClientes({ fechaInicio, fechaFin, estado } =
      FROM cliente c
      INNER JOIN usuario u ON u.id_usuario = c.fk_usuario
      INNER JOIN estado e ON e.id_estado = u.fk_estado
+     INNER JOIN rol r ON r.id_rol = u.fk_rol
      ${whereDetalle}
      ORDER BY u.fecha_registro DESC`,
     parametrosDetalle
