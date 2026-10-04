@@ -9,6 +9,7 @@ import {
 import { crearToken } from '../utils/jwt.js';
 import { errorResponse, successResponse } from '../utils/api-response.js';
 import { estaBloqueado, minutosRestantes } from '../utils/bloqueo-login.js';
+import { normalizarContacto, validarDatosContacto } from '../validations/autenticacion.validation.js';
 
 function respuestaCuentaBloqueada(res, bloqueadoHasta, ahora) {
   const minutos = minutosRestantes(bloqueadoHasta, ahora);
@@ -37,13 +38,19 @@ export function usuarioPublico(usuario) {
 
 export async function registrar(req, res, next) {
   try {
+    const contacto = normalizarContacto(req.body);
+    const errores = validarDatosContacto(contacto);
+    if (errores.length > 0) {
+      return errorResponse(res, 400, 'Datos inválidos', 'VALIDATION_ERROR', errores);
+    }
+
     const usuario = await crearUsuarioConExtension({
       nombre: req.body.nombre.trim(),
       apellido: req.body.apellido.trim(),
-      documentoIdentidad: req.body.documento_identidad.trim(),
-      correo: req.body.correo.trim().toLowerCase(),
+      documentoIdentidad: contacto.documento_identidad,
+      correo: contacto.correo,
       contrasena: req.body.contrasena,
-      telefono: req.body.telefono?.trim(),
+      telefono: contacto.telefono,
       nombreRol: 'Cliente',
       codigoMiembro: req.body.codigo_miembro?.trim()
     });
